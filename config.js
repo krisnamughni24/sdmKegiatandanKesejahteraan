@@ -5,7 +5,7 @@ window.APP_CONFIG = {
   clientId: "686372700251-qsbsutbjuubli03r5qdntso2ep68gls0.apps.googleusercontent.com",
 
   // Google Apps Script web app URL (ends with /exec). See README.md.
-  scriptUrl: "",
+  scriptUrl: "https://script.google.com/macros/s/AKfycbzZ-CS4-RNK0BMnZ0qlpaSFa7SeMIYUBmpnbPPsQioe08-7b7o3zLtMCijJUFdttm2t/exec",
 
   // Only Google accounts on this domain may sign in and submit.
   allowedDomain: "p3md.sbm-itb.ac.id",
