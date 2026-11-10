@@ -47,7 +47,7 @@ button{font:inherit;color:inherit;cursor:pointer}
   border-bottom:2px dashed var(--line-2)}
 .top-in{max-width:640px;margin:0 auto;padding:8px 16px 6px}
 .top-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;color:var(--ink-2)}
-.brand{font-family:"Fredoka";font-weight:600;font-size:15px;color:var(--ink);display:flex;gap:6px;align-items:center}
+.brand{font-family:"Fredoka";font-weight:600;font-size:13.5px;color:var(--ink);display:flex;gap:6px;align-items:center;white-space:nowrap;flex:none}
 .who{display:flex;gap:8px;align-items:center;min-width:0}
 .who span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:44vw}
 .chip-btn{border:2px solid var(--line-2);background:var(--paper);border-radius:99px;padding:2px 10px;font-size:12px;font-weight:700}
@@ -97,6 +97,10 @@ button{font:inherit;color:inherit;cursor:pointer}
 .sec-intro{margin:12px 0 4px}
 .subhead{margin:20px 2px 8px;display:flex;align-items:baseline;gap:8px}
 .subhead h3{font-size:17px}
+.group-head{margin:30px 2px 0;padding-top:16px;border-top:2px dashed var(--line-2)}
+.group-head h3{font-size:19px}
+.group-head p{margin:4px 0 0}
+.sec-intro{white-space:pre-line}
 .subhead .scale-note{font-size:12px;color:var(--ink-3);font-weight:700}
 
 /* Questions */
@@ -243,14 +247,13 @@ const ACTS = [
   { k: "kelas", label: "Kegiatan kelas dan perkuliahan" },
   { k: "tugas", label: "Tugas individu dan tugas sindikat di luar jam kelas" },
   { k: "fisik", label: "Kegiatan fisik, latihan, dan apel" },
-  { k: "peran", label: "Peran tambahan (Senat, kepanitiaan, ketua kelas, sindikat, atau ALP)", show: hasRole }
+  { k: "peran", label: "Peran tambahan (Senat, kepanitiaan, ketua kelas)", show: hasRole }
 ];
-const DIMS = [
-  { k: "pikir", label: "Menuntut berpikir, mengingat, dan mengambil keputusan" },
-  { k: "fisik", label: "Berat tuntutan fisiknya" },
-  { k: "waktu", label: "Merasa diburu waktu" },
-  { k: "usaha", label: "Harus berusaha keras" }
-];
+// NASA-TLX grid: one question per dimension, one 0–10 row per activity.
+// Answer keys stay tlx_<activity>_<dimension>.
+const tlxKey = (act, dim) => `tlx_${act}_${dim}`;
+const tlxActs = it => ACTS.filter(a => !a.show || a.show(S.answers));
+const tlxLabel = (it, a) => (a.k === "peran" && it.peranLabel) || a.label;
 
 const SECTIONS = [
   { id: "diri", name: "Bintang", charm: "star", color: "--butter", light: "--butter-l", short: "Diri",
@@ -279,7 +282,7 @@ const SECTIONS = [
   { id: "tuntutan", name: "Awan", charm: "cloud", color: "--sky", light: "--sky-l", short: "Tuntutan",
     title: "Tuntutan Kegiatan", intro: "Gambarkan kondisi selama Anda mengikuti pendidikan. Pilih jawaban yang paling sesuai dengan pengalaman Anda.",
     blocks: [
-      { head: "Beban dan tempo", scale: "freq", items: [
+      { head: "Seberapa sering hal berikut Anda alami?", scale: "freq", items: [
         L("qd1", "Beban tugas saya tidak merata sehingga menumpuk pada waktu tertentu.", "freq"),
         L("qd2", "Saya tidak sempat menyelesaikan semua tugas.", "freq"),
         L("qd3", "Saya tertinggal dalam menyelesaikan tugas.", "freq"),
@@ -288,18 +291,18 @@ const SECTIONS = [
         L("rc1", "Berbagai pihak menuntut hal-hal dari saya yang sulit dipenuhi secara bersamaan.", "freq"),
         L("rest1", "Saya tidak mendapat waktu istirahat yang cukup.", "freq")
       ] },
-      { head: "Kegiatan pendidikan menuntut saya untuk…", scale: "freq", items: [
+      { head: "Seberapa sering kegiatan pendidikan menuntut Anda untuk…", scale: "freq", items: [
         L("cd1", "…memperhatikan banyak hal sekaligus.", "freq"),
         L("cd2", "…mengingat banyak hal.", "freq"),
         L("cd3", "…memunculkan gagasan baru.", "freq"),
         L("cd4", "…mengambil keputusan yang sulit.", "freq")
       ] },
-      { head: "Situasi emosional", scale: "freq", items: [
+      { head: "Seberapa sering hal berikut Anda alami?", scale: "freq", items: [
         L("ed1", "Saya berada pada situasi yang mengganggu secara emosional.", "freq"),
         L("ed2", "Saya perlu ikut menangani masalah pribadi orang lain, misalnya sebagai ketua atau pengurus.", "freq"),
         L("ed3", "Kegiatan pendidikan menuntut saya untuk tidak menyampaikan pendapat.", "freq")
       ] },
-      { head: "Beban perasaan", scale: "size", items: [
+      { head: "Seberapa besar hal berikut Anda rasakan?", scale: "size", items: [
         L("es1", "Kegiatan pendidikan terasa berat secara emosional.", "size"),
         L("es2", "Kegiatan pendidikan menuntut saya menyembunyikan perasaan.", "size"),
         L("es3", "Saya dituntut tetap ramah dan terbuka kepada siapa pun, apa pun sikap mereka kepada saya.", "size")
@@ -309,16 +312,16 @@ const SECTIONS = [
   { id: "bersama", name: "Hati", charm: "heart", color: "--pink", light: "--pink-l", short: "Bersama",
     title: "Kendali & Kebersamaan", intro: "Seberapa leluasa Anda mengatur diri, dan bagaimana kebersamaan dengan sesama Serdik?",
     blocks: [
-      { head: "Mengatur diri", scale: "freq", items: [
+      { head: "Seberapa sering hal berikut Anda alami?", scale: "freq", items: [
         L("inf1", "Saya dapat menentukan kapan beristirahat.", "freq"),
         L("inf2", "Saya dapat mengatur kecepatan saya dalam mengerjakan tugas.", "freq")
       ] },
-      { head: "Dukungan sesama Serdik", scale: "freq", items: [
+      { head: "Seberapa sering hal berikut Anda alami?", scale: "freq", items: [
         L("sup1", "Saya mendapat bantuan dan dukungan dari sesama Serdik ketika membutuhkannya.", "freq"),
         L("sup2", "Sesama Serdik bersedia mendengarkan masalah saya terkait pendidikan.", "freq"),
         L("sup3", "Sesama Serdik memberi masukan tentang seberapa baik saya menjalankan tugas.", "freq")
       ] },
-      { head: "Suasana komunitas", scale: "freq", items: [
+      { head: "Seberapa sering hal berikut Anda alami?", scale: "freq", items: [
         L("com1", "Ada suasana yang baik antara saya dan sesama Serdik.", "freq"),
         L("com2", "Ada kerja sama yang baik di antara sesama Serdik.", "freq"),
         L("com3", "Saya merasa menjadi bagian dari komunitas Serdik.", "freq"),
@@ -327,32 +330,32 @@ const SECTIONS = [
     ] },
 
   { id: "beban", name: "Petir", charm: "bolt", color: "--peach", light: "--peach-l", short: "Beban",
-    title: "Beban per Kegiatan", intro: "Ingat kembali kegiatan Anda dua minggu terakhir, lalu beri nilai 0–10 untuk setiap kegiatan. 0 = sangat rendah, 10 = sangat tinggi.",
+    title: "Beban per Kegiatan", intro: "Ingat kembali kegiatan Anda dua minggu terakhir, lalu beri nilai 0–10 untuk setiap kegiatan ⚖️\n0 = sangat rendah · 10 = sangat tinggi\nLewati baris kegiatan yang tidak Anda jalani, seperti \"Peran tambahan\" bila tidak memegang peran.",
     blocks: [
       { items: [
-        { k: "tlx_kelas", t: "tlx", act: ACTS[0] },
-        { k: "tlx_tugas", t: "tlx", act: ACTS[1] },
+        { k: "tlxd_pikir", t: "tlx", dim: "pikir", q: "Seberapa besar kegiatan ini menuntut Anda berpikir, mengingat, dan mengambil keputusan?", peranLabel: "Peran tambahan (Senat, kepanitiaan, ketua kelas, ketua ALP)" },
+        { k: "tlxd_fisik", t: "tlx", dim: "fisik", q: "Seberapa berat tuntutan fisik dalam kegiatan ini? 💪" },
+        { k: "tlxd_waktu", t: "tlx", dim: "waktu", q: "Seberapa besar Anda merasa diburu waktu dalam kegiatan ini? ⏳" },
         L("att1", "Pilih jawaban \"Jarang\" untuk pertanyaan ini.", "freq"),
-        { k: "tlx_fisik", t: "tlx", act: ACTS[2] },
-        { k: "tlx_peran", t: "tlx", act: ACTS[3], show: hasRole }
+        { k: "tlxd_usaha", t: "tlx", dim: "usaha", q: "Seberapa keras Anda harus berusaha dalam kegiatan ini? 🔥" }
       ] }
     ] },
 
   { id: "makna", name: "Bunga", charm: "flower", color: "--mint", light: "--mint-l", short: "Makna",
-    title: "Makna & Kehidupan Pribadi", intro: "Seberapa bermakna kegiatan Anda, dan bagaimana pengaruhnya pada kehidupan pribadi dan keluarga?",
+    title: "Makna & Kehidupan Pribadi", intro: "Seberapa bermakna kegiatan Anda, dan bagaimana pengaruhnya pada kehidupan pribadi dan keluarga? 🌱",
     blocks: [
-      { head: "Makna kegiatan", scale: "size", items: [
+      { head: "Sejauh mana pernyataan berikut sesuai dengan kondisi Anda?", scale: "size", items: [
         L("mean1", "Kegiatan pendidikan yang saya jalani bermakna bagi saya.", "size"),
         L("mean2", "Kegiatan yang saya lakukan terasa penting.", "size")
       ] },
-      { head: "Variasi kegiatan", scale: "freq", items: [
+      { head: "Seberapa sering hal berikut Anda alami?", scale: "freq", items: [
         L("var1", "Kegiatan pendidikan saya bervariasi.", "freq"),
         L("var2", "Saya harus melakukan hal yang sama secara berulang-ulang.", "freq")
       ] },
-      { head: "Pendidikan dan kehidupan pribadi", note: "Termasuk keluarga dan urusan pribadi.", scale: "freq", items: [
+      { group: "👨‍👩‍👧 Kegiatan pendidikan dan kehidupan pribadi", note: "Pertanyaan berikut menyangkut pengaruh kegiatan pendidikan terhadap kehidupan pribadi Anda, termasuk keluarga dan urusan pribadi.", head: "Seberapa sering hal berikut Anda alami?", scale: "freq", items: [
         L("wfc1", "Ada saat-saat ketika saya perlu menjalani kegiatan pendidikan dan mengurus urusan keluarga atau pribadi pada waktu yang bersamaan.", "freq")
       ] },
-      { scale: "size", items: [
+      { head: "Sejauh mana pernyataan berikut sesuai dengan kondisi Anda?", scale: "size", items: [
         L("wfc2", "Kegiatan pendidikan menyita begitu banyak tenaga saya sehingga berdampak buruk pada kehidupan pribadi saya.", "size"),
         L("wfc3", "Kegiatan pendidikan menyita begitu banyak waktu saya sehingga berdampak buruk pada kehidupan pribadi saya.", "size"),
         L("wfc4", "Tuntutan kegiatan pendidikan mengganggu kehidupan pribadi dan keluarga saya.", "size"),
@@ -364,7 +367,7 @@ const SECTIONS = [
     title: "Kondisi Diri", intro: "Bagaimana kondisi Anda selama 4 minggu terakhir? Jawab tentang keadaan Anda secara umum, baik yang berkaitan dengan pendidikan maupun tidak.",
     blocks: [
       { items: [
-        { k: "gh", t: "choice", q: "Secara umum, bagaimana Anda menilai kesehatan Anda?", options: ["Sangat baik sekali", "Sangat baik", "Baik", "Cukup", "Buruk"] }
+        { k: "gh", t: "choice", q: "Secara umum, bagaimana Anda menilai kesehatan Anda?", options: ["Sempurna", "Sangat baik", "Baik", "Cukup", "Buruk"] }
       ] },
       { head: "Selama 4 minggu terakhir, seberapa sering Anda…", scale: "time", items: [
         L("bo1", "…merasa kehabisan tenaga?", "time"),
@@ -375,7 +378,7 @@ const SECTIONS = [
         L("st2", "…mudah tersinggung?", "time"),
         L("st3", "…merasa tegang?", "time")
       ] },
-      { head: "Tidur dan keluhan tubuh", scale: "time", items: [
+      { head: "Selama 4 minggu terakhir, seberapa sering Anda…", scale: "time", items: [
         L("sl1", "…tidur tidak nyenyak dan gelisah?", "time"),
         L("sl2", "…sulit tertidur?", "time"),
         L("sl3", "…terbangun terlalu pagi dan tidak dapat tidur kembali?", "time"),
@@ -469,7 +472,7 @@ const allItems = sec => sec.blocks.flatMap(b => b.items);
 const visible = it => !it.show || it.show(S.answers);
 function units(it) {
   // Answer slots an item contributes to progress.
-  if (it.t === "tlx") return DIMS.map(d => `${it.k}_${d.k}`);
+  if (it.t === "tlx") return tlxActs(it).map(a => tlxKey(a.k, it.dim));
   return [it.k];
 }
 function filled(it) {
@@ -637,8 +640,6 @@ function renderConsent() {
     <section class="sec-head"><div class="badge" style="border-color:var(--pink)">${charmSVG("heart", cssVar("--pink"), { filled: false })}</div>
       <div><span class="eyebrow">Persetujuan</span><h2>Apakah Anda bersedia mengisi kuesioner ini?</h2></div></section>
     <section class="card stack" style="margin-top:16px">
-      <p style="margin:0">Hasilnya akan menjadi bahan untuk menata tempo dan kegiatan ke depan, supaya kita tetap semangat, sehat, dan makin solid.</p>
-      <p class="small muted" style="margin:0">${esc(CFG.dataNotice)}</p>
       <div class="opts">
         <button class="opt" data-consent="Ya"><i></i>Ya, saya bersedia</button>
         <button class="opt" data-consent="Tidak"><i></i>Tidak</button>
@@ -673,9 +674,9 @@ function itemHTML(it, n) {
     body = `<div class="lik" role="radiogroup" aria-label="${esc(it.q)}">${SCALES[it.scale].map((l, i) =>
       `<button type="button" data-k="${it.k}" data-v="${i + 1}" aria-pressed="${a[it.k] === i + 1}"><i></i>${esc(l)}</button>`).join("")}</div>`;
   } else if (it.t === "tlx") {
-    return `<div class="q" data-item="${it.k}"><div class="q-t"><span class="q-n">${n}</span><div>${esc(it.act.label)}<div class="q-h">0 = sangat rendah · 10 = sangat tinggi</div></div></div>
-      ${DIMS.map(d => { const k = `${it.k}_${d.k}`; return `<div class="tlx-row" data-row="${k}"><div class="lbl">${esc(d.label)}</div>
-        <div class="ten" role="radiogroup" aria-label="${esc(d.label)}">${Array.from({ length: 11 }, (_, v) =>
+    return `<div class="q" data-item="${it.k}"><div class="q-t"><span class="q-n">${n}</span><div>${esc(it.q)}<div class="q-h">0 = sangat rendah · 10 = sangat tinggi</div></div></div>
+      ${tlxActs(it).map(act => { const k = tlxKey(act.k, it.dim), lbl = tlxLabel(it, act); return `<div class="tlx-row" data-row="${k}"><div class="lbl">${esc(lbl)}</div>
+        <div class="ten" role="radiogroup" aria-label="${esc(lbl)}">${Array.from({ length: 11 }, (_, v) =>
           `<button type="button" data-k="${k}" data-v="${v}" aria-pressed="${a[k] === v}">${v}</button>`).join("")}</div>
         <div class="ten-ends"><span>sangat rendah</span><span>sangat tinggi</span></div></div>`; }).join("")}</div>`;
   } else if (it.t === "choice") {
@@ -714,7 +715,8 @@ function renderSection(i) {
       <div><span class="eyebrow">Pesona ${i + 1} dari ${SECTIONS.length} · ${esc(sec.name)}</span><h2>${esc(sec.title)}</h2></div></section>
     <p class="sec-intro muted">${esc(sec.intro)}</p>`;
   for (const b of sec.blocks) {
-    if (b.head) html += `<div class="subhead"><h3>${esc(b.head)}</h3></div>${b.note ? `<p class="small muted" style="margin:-4px 2px 6px">${esc(b.note)}</p>` : ""}`;
+    if (b.group) html += `<div class="group-head"><h3>${esc(b.group)}</h3>${b.note ? `<p class="small muted">${esc(b.note)}</p>` : ""}</div>`;
+    if (b.head) html += `<div class="subhead"><h3>${esc(b.head)}</h3></div>`;
     else if (b.scale) html += `<div style="height:8px"></div>`;
     for (const it of b.items) {
       n++;
@@ -747,7 +749,7 @@ function syncVisibility() {
 }
 function refreshItem(k) {
   const i = secIndex(S.step); if (i < 0) return;
-  const it = allItems(SECTIONS[i]).find(x => x.k === k || (x.t === "tlx" && k.startsWith(x.k + "_")));
+  const it = allItems(SECTIONS[i]).find(x => x.k === k || (x.t === "tlx" && units(x).includes(k)));
   if (!it) return;
   const el = $app.querySelector(`[data-item="${it.k}"]`);
   if (el) el.classList.toggle("done", filled(it) && !invalid(it));
@@ -875,7 +877,11 @@ function payload() {
   const pushVal = (k, label, value, codes) => rows.push({ k, label, value: value ?? "", codes: codes || "" });
   for (const s of SECTIONS) for (const it of allItems(s)) {
     const vis = visible(it), a = S.answers;
-    if (it.t === "tlx") { DIMS.forEach(d => pushVal(`${it.k}_${d.k}`, `${it.act.label} — ${d.label}`, vis ? a[`${it.k}_${d.k}`] : "", "0–10")); continue; }
+    if (it.t === "tlx") {
+      ACTS.forEach(act => { const k = tlxKey(act.k, it.dim), on = !act.show || act.show(a);
+        pushVal(k, `${it.q} — ${tlxLabel(it, act)}`, on ? a[k] : "", "0–10"); });
+      continue;
+    }
     let v = vis ? a[it.k] : "";
     if (it.k === "peran_jam" && !hasRole(a)) v = "Tidak ada";
     if (it.t === "choice" && v === "__other") v = "Lainnya: " + (a[it.k + "_other"] || "").trim();

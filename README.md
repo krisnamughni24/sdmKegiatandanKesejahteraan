@@ -40,10 +40,11 @@ sent, and the submit button only simulates sending. Good for showing Bidang SDM.
   weekly hours and the "Peran tambahan" NASA-TLX rows only when a role is chosen.
   Hidden answers are sent empty; `peran_jam` is sent as "Tidak ada".
 - "Tidak ada" is exclusive in multi-select questions.
-- Bagian 5 (NASA-TLX) is grouped per activity (4 ratings each) instead of per
-  dimension; attention check `att1` (expected answer: 2 = Jarang) sits between activities.
+- Bagian 5 (NASA-TLX) follows the form: one question per dimension (pikir,
+  fisik, waktu, usaha) with a 0–10 row per activity; attention check `att1`
+  (expected answer: 2 = Jarang) sits between "waktu" and "usaha". The
+  "diburu waktu dalam ini" typo is fixed to "dalam kegiatan ini".
 - Sleep hours bins no longer overlap: <3, 3–<4, 4–<5, 5–<6, ≥6.
-- Health item: "Sempurna" relabelled "Sangat baik sekali".
 - "Hari dan jam paling kurang istirahat" is a day × time-of-day grid
   (stored as `Senin Malam; Rabu Pagi; …`) plus an optional note.
 - Last open question and the note are optional; everything else is required.
