@@ -582,6 +582,7 @@ function renderLogin() {
         <p style="margin:0">Masuk dengan akun Google <b>@${esc(CFG.allowedDomain)}</b> untuk mulai mengisi.</p>
         <div class="gbtn" id="gbtn"></div>
         <p class="small muted" style="margin:0">Kami hanya membaca nama dan alamat email akun Anda untuk memastikan Anda Serdik P3MD. Tidak ada kata sandi yang dilihat atau disimpan. Satu akun hanya bisa mengirim satu kali.</p>
+        ${CFG.scriptUrl ? "" : `<div class="notice"><b>Penyimpanan belum aktif.</b> URL Apps Script belum diisi di <code>config.js</code>, jadi draf dan jawaban belum bisa disimpan.</div>`}
         <div class="err" id="loginErr" hidden></div>`}
     </section>
     <footer>${esc(CFG.organizer)} · <a href="privasi.html" style="color:inherit">Kebijakan privasi</a></footer>`;
@@ -889,6 +890,7 @@ async function submit() {
   const btn = document.getElementById("sendBtn"), err = document.getElementById("sendErr");
   btn.disabled = true; btn.textContent = "Mengirim…"; err.hidden = true;
   try {
+    if (!PREVIEW && !CFG.scriptUrl) throw new Error("Pengiriman belum aktif: panitia belum mengisi URL Apps Script di config.js. Jawaban Anda belum terkirim.");
     if (!tokenFresh()) await reauth();
     if (!tokenFresh()) throw new Error("Sesi login habis. Masuk lagi untuk mengirim; jawaban Anda tidak hilang.");
     if (PREVIEW) { await new Promise(r => setTimeout(r, 700)); }

@@ -18,7 +18,7 @@
  * No secrets live in this file. The Client ID is public by design.
  */
 
-const CLIENT_ID = "PASTE_YOUR_CLIENT_ID.apps.googleusercontent.com"; // same value as config.js
+const CLIENT_ID = "686372700251-qsbsutbjuubli03r5qdntso2ep68gls0.apps.googleusercontent.com"; // same value as config.js
 const ALLOWED_DOMAIN = "p3md.sbm-itb.ac.id";
 const SHEET_ANSWERS = "Jawaban";
 const SHEET_DRAFT = "Draf";

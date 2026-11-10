@@ -2,7 +2,7 @@
 window.APP_CONFIG = {
   // OAuth 2.0 Client ID (Web application) from Google Cloud Console.
   // Leave empty to run the site in preview mode (no sign-in, nothing is sent).
-  clientId: "",
+  clientId: "686372700251-qsbsutbjuubli03r5qdntso2ep68gls0.apps.googleusercontent.com",
 
   // Google Apps Script web app URL (ends with /exec). See README.md.
   scriptUrl: "",
