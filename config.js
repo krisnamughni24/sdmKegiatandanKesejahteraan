@@ -10,6 +10,10 @@ window.APP_CONFIG = {
   // Only Google accounts on this domain may sign in and submit.
   allowedDomain: "p3md.sbm-itb.ac.id",
 
+  // Minutes without activity (including time minimized) before the person is
+  // signed out and sent back to the sign-in screen. Answers are saved first.
+  idleMinutes: 30,
+
   // Shown on the welcome and closing screens.
   organizer: "Bidang SDM Senat P3MD",
   sdmContact: {

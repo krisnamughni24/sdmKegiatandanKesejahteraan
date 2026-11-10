@@ -31,8 +31,11 @@ sent, and the submit button only simulates sending. Good for showing Bidang SDM.
   request every 6 s per person, immediately on finishing a section, and a
   last `sendBeacon` when the tab is hidden or closed), loaded back after sign-in on any device, and deleted on submission
   or with "Mulai dari awal". Sign-in is never persisted; every visit asks for
-  Google sign-in again. An expired ID token (1 hour) is renewed in a popup
-  without losing in-memory answers.
+  Google sign-in again. An expired ID token (1 hour, set by Google) opens a
+  sign-in popup without losing in-memory answers.
+- Idle sign-out: after `idleMinutes` (default 30) without activity, including
+  time minimized, unsaved answers are sent and the person returns to the
+  sign-in screen with a notice. Configurable in `config.js`.
 
 ## Changes from the Google Form (worth confirming with Bidang SDM)
 

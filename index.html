@@ -205,7 +205,7 @@ footer{text-align:center;font-size:12px;color:var(--ink-3);margin-top:28px}
 /* ---------- Config ---------- */
 const CFG = Object.assign({
   clientId: "", scriptUrl: "", allowedDomain: "p3md.sbm-itb.ac.id",
-  organizer: "Bidang SDM Senat P3MD", sdmContact: { name: "Bidang SDM", wa: "" },
+  organizer: "Bidang SDM Senat P3MD", sdmContact: { name: "Bidang SDM", wa: "" }, idleMinutes: 30,
   dataNotice: "Jawaban mentah hanya dibuka oleh tim pengolah Bidang SDM. Hasil dilaporkan secara agregat, tidak per orang."
 }, window.APP_CONFIG || {});
 const PREVIEW = !CFG.clientId;
@@ -420,6 +420,7 @@ const TIMES = ["Pagi", "Siang", "Sore", "Malam"];
 
 /* ---------- State & storage ---------- */
 let user = null;          // { email, name, idToken }
+let idleNotice = "";      // shown once on the sign-in screen after an idle sign-out
 let S = { answers: {}, step: "welcome" };
 /* Nothing is kept in the browser (same as Ekspedisi 9 Nilai): state lives in
    memory and is saved server-side to the "Draf" tab per question. Each answer
@@ -470,8 +471,9 @@ async function flushSave(opts = {}) {
   const json = draftJSON();
   if (json === AS.lastSent) { setSaveStatus(AS.lastSent ? "saved" : "idle"); return true; }
   if (!tokenFresh()) {
-    if (opts.reauth) await reauth();
+    if (opts.reauth || (!opts.quiet && !AS.askedReauth && document.visibilityState === "visible")) { AS.askedReauth = true; await reauth(); }
     if (!tokenFresh()) { setSaveStatus("expired"); return false; }
+    AS.askedReauth = false;
   }
   setSaveStatus("saving");
   AS.lastAt = Date.now();
@@ -641,6 +643,7 @@ function renderLogin() {
       <h1>Kuesioner Beban Kegiatan dan <em>Kesejahteraan</em> Serdik</h1>
     </section>
     <section class="card stack" style="margin-top:18px">
+      ${idleNotice ? `<div class="notice">${esc(idleNotice)}</div>` : ""}
       ${PREVIEW ? `
         <div class="notice"><b>Mode pratinjau.</b> Client ID Google belum diisi di <code>config.js</code>, jadi Anda bisa mencoba alurnya tanpa masuk. Jawaban tidak dikirim ke mana pun.</div>
         <button class="btn block" id="previewBtn">Coba mode pratinjau</button>` : `
@@ -1082,7 +1085,7 @@ function initGoogle(tries = 0) {
   if (host) google.accounts.id.renderButton(host, { theme: "outline", size: "large", shape: "pill", text: "signin_with", locale: "id" });
 }
 async function signedIn(u) {
-  user = u;
+  user = u; idleNotice = ""; lastActive = Date.now();
   S = { answers: {}, step: "welcome" };
   clearTimeout(AS.timer); Object.assign(AS, { lastSent: "", lastAt: 0, again: false, status: "idle" });
   if (!PREVIEW && CFG.scriptUrl) {
@@ -1101,16 +1104,41 @@ async function signedIn(u) {
   S.step = "welcome";
   render();
 }
+function signOut(notice = "") {
+  clearTimeout(AS.timer);
+  if (!PREVIEW && window.google && google.accounts) google.accounts.id.disableAutoSelect();
+  document.querySelectorAll(".overlay").forEach(o => o.remove());
+  reauthResolve = null;
+  idleNotice = notice;
+  user = null; S = { answers: {}, step: "welcome" }; render(); window.scrollTo({ top: 0 });
+}
 document.getElementById("logoutBtn").onclick = async () => {
   if (hasUnsaved()) {
     toast("Menyimpan jawaban terakhir…");
-    const ok = await flushSave();
+    const ok = await flushSave({ quiet: true });
     if (!ok && !confirm("Jawaban terakhir belum tersimpan. Tetap keluar?")) return;
   }
-  clearTimeout(AS.timer);
-  if (!PREVIEW && window.google && google.accounts) google.accounts.id.disableAutoSelect();
-  user = null; S = { answers: {}, step: "welcome" }; render();
+  signOut();
 };
+
+/* Idle sign-out: after CFG.idleMinutes without activity, including time spent
+   minimized or in another app, unsaved answers are sent and the person goes
+   back to the sign-in screen. Checked by a timer while visible and again on
+   return, because hidden tabs throttle timers. */
+const IDLE_MS = Math.max(1, Number(CFG.idleMinutes) || 30) * 60000;
+let lastActive = Date.now();
+const touch = () => { lastActive = Date.now(); };
+["pointerdown", "keydown", "input", "touchstart", "wheel"].forEach(ev => document.addEventListener(ev, touch, { passive: true, capture: true }));
+let lastScrollTouch = 0;
+window.addEventListener("scroll", () => { const n = Date.now(); if (n - lastScrollTouch > 5000) { lastScrollTouch = n; touch(); } }, { passive: true });
+function idleCheck() {
+  if (!user || Date.now() - lastActive < IDLE_MS) return;
+  if (hasUnsaved()) { beaconSave(); }
+  signOut(S.submitted ? "" : `Anda keluar otomatis karena tidak ada aktivitas selama ${Math.round(IDLE_MS / 60000)} menit. Jawaban yang sudah diisi tersimpan; masuk lagi untuk melanjutkan.`);
+}
+setInterval(idleCheck, 20000);
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") idleCheck(); });
+window.addEventListener("pageshow", idleCheck);
 
 render();
 </script>
