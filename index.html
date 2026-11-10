@@ -1,0 +1,967 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gelang Pesona Serdik</title>
+<meta name="description" content="Kuesioner Beban Kegiatan dan Kesejahteraan Serdik P3MD">
+<meta name="theme-color" content="#FFF6EE">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.2 0 3.6 1.2 4.3 2.4h2c.7-1.2 2.1-2.4 4.3-2.4 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z' fill='%23F0648A'/%3E%3C/svg%3E">
+<script src="config.js" onerror="void 0"></script>
+<style>
+/* Theme: a charm bracelet. Each survey section earns one charm; the bracelet
+   at the top is the progress bar. Light theme only, candy palette on cream. */
+:root{
+  --cream:#FFF6EE; --paper:#FFFFFF; --ink:#3A2440; --ink-2:#6E5A72; --ink-3:#A08FA3;
+  --line:#F0E1DA; --line-2:#E6CFC6;
+  --pink:#F0648A; --pink-d:#C9466C; --pink-l:#FFE1E9;
+  --butter:#FFC94D; --butter-l:#FFF1C9;
+  --sky:#5FB4EE; --sky-l:#DDF0FD;
+  --peach:#FF8F5A; --peach-l:#FFE6D9;
+  --mint:#3FC495; --mint-l:#D8F5EA;
+  --lilac:#9C82EC; --lilac-l:#ECE6FD;
+  --rose:#E86FB8; --rose-l:#FBE3F2;
+  --gold:#E9B23A;
+  --r:22px; --shadow:0 2px 0 var(--line-2), 0 10px 30px -18px rgba(58,36,64,.35);
+  --c:var(--pink); --cl:var(--pink-l);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background-color:var(--cream);
+  background-image:radial-gradient(circle at 1px 1px, rgba(240,100,138,.13) 1.6px, transparent 2px);
+  background-size:22px 22px;
+  color:var(--ink); font:16px/1.55 "Nunito",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased; min-height:100vh;
+}
+h1,h2,h3,.display{font-family:"Fredoka","Nunito",sans-serif;font-weight:600;letter-spacing:-.01em;margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+[hidden]{display:none!important}
+.wrap{max-width:640px;margin:0 auto;padding:0 16px 120px}
+
+/* Top strip with bracelet */
+.top{position:sticky;top:0;z-index:20;background:rgba(255,246,238,.92);backdrop-filter:blur(8px);
+  border-bottom:2px dashed var(--line-2)}
+.top-in{max-width:640px;margin:0 auto;padding:8px 16px 6px}
+.top-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;color:var(--ink-2)}
+.brand{font-family:"Fredoka";font-weight:600;font-size:15px;color:var(--ink);display:flex;gap:6px;align-items:center}
+.who{display:flex;gap:8px;align-items:center;min-width:0}
+.who span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:44vw}
+.chip-btn{border:2px solid var(--line-2);background:var(--paper);border-radius:99px;padding:2px 10px;font-size:12px;font-weight:700}
+.bracelet{display:block;width:100%;height:auto;margin-top:2px;overflow:visible}
+.bracelet .slot{transition:transform .35s cubic-bezier(.3,1.6,.5,1)}
+.bracelet .slot.now{animation:swing 1.8s ease-in-out infinite}
+@keyframes swing{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
+
+/* Cards */
+.card{background:var(--paper);border:2px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:20px}
+.stack{display:flex;flex-direction:column;gap:14px}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--c)}
+.muted{color:var(--ink-2)}
+.small{font-size:13.5px}
+
+/* Buttons */
+.btn{border:0;border-radius:99px;padding:13px 22px;font-weight:800;font-size:16px;background:var(--pink);color:#fff;
+  box-shadow:0 4px 0 var(--pink-d);transition:transform .08s, box-shadow .08s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--pink-d)}
+.btn.ghost{background:var(--paper);color:var(--ink);border:2px solid var(--line-2);box-shadow:0 3px 0 var(--line-2)}
+.btn.block{width:100%}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.link{border:0;background:none;color:var(--ink-2);font-weight:700;text-decoration:underline;padding:6px}
+
+/* Welcome */
+.hero{padding-top:22px;text-align:center}
+.hero h1{font-size:34px;line-height:1.1;margin:10px 0 6px}
+.hero h1 em{font-style:normal;color:var(--pink)}
+.hero-charms{display:flex;justify-content:center;gap:6px;margin-bottom:4px}
+.hero-charms svg{width:34px;height:34px;animation:bob 2.4s ease-in-out infinite}
+.hero-charms svg:nth-child(2n){animation-delay:-.6s}
+.hero-charms svg:nth-child(3n){animation-delay:-1.2s}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.facts{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:12px 0 4px}
+.facts span{background:var(--paper);border:2px solid var(--line);border-radius:99px;padding:4px 12px;font-size:13px;font-weight:700}
+.path{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.path li{text-align:center;font-size:11px;font-weight:700;color:var(--ink-2);line-height:1.2}
+.path svg{width:30px;height:30px;display:block;margin:0 auto 4px}
+.rules{margin:0;padding-left:20px}
+.rules li{margin:6px 0}
+
+/* Section head */
+.sec-head{padding-top:20px;display:flex;gap:14px;align-items:center}
+.sec-head .badge{flex:none;width:58px;height:58px;border-radius:18px;background:var(--cl);display:grid;place-items:center;border:2px solid var(--c)}
+.sec-head .badge svg{width:36px;height:36px}
+.sec-head h2{font-size:24px;line-height:1.15}
+.sec-intro{margin:12px 0 4px}
+.subhead{margin:20px 2px 8px;display:flex;align-items:baseline;gap:8px}
+.subhead h3{font-size:17px}
+.subhead .scale-note{font-size:12px;color:var(--ink-3);font-weight:700}
+
+/* Questions */
+.q{background:var(--paper);border:2px solid var(--line);border-radius:18px;padding:14px 14px 12px;margin:10px 0;transition:border-color .2s, box-shadow .2s}
+.q.done{border-color:color-mix(in srgb,var(--c) 45%,var(--line))}
+.q.miss{border-color:var(--pink);box-shadow:0 0 0 4px var(--pink-l);animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
+.q-t{font-weight:700;display:flex;gap:8px}
+.q-n{flex:none;font:600 12px/1 "Fredoka";color:var(--c);background:var(--cl);border-radius:99px;padding:4px 7px;height:max-content;margin-top:2px}
+.q-h{font-size:13px;color:var(--ink-2);margin-top:2px}
+.req{color:var(--pink)}
+.lik{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px}
+.lik button{border:2px solid var(--line-2);background:#FFFCFA;border-radius:14px;padding:8px 2px 7px;font-size:11.5px;font-weight:700;line-height:1.15;color:var(--ink-2);
+  display:flex;flex-direction:column;align-items:center;gap:5px;min-height:62px;justify-content:flex-start}
+.lik button i{width:16px;height:16px;border-radius:50%;border:2px solid var(--line-2);background:#fff;flex:none;transition:all .15s}
+.lik button[aria-pressed="true"]{border-color:var(--c);background:var(--cl);color:var(--ink)}
+.lik button[aria-pressed="true"] i{background:var(--c);border-color:var(--c);box-shadow:inset 0 0 0 3px #fff}
+.ten{display:grid;grid-template-columns:repeat(11,1fr);gap:4px;margin-top:8px}
+.ten button{border:2px solid var(--line-2);background:#FFFCFA;border-radius:10px;padding:7px 0;font:600 14px/1 "Fredoka";color:var(--ink-2)}
+.ten button[aria-pressed="true"]{background:var(--c);border-color:var(--c);color:#fff;transform:scale(1.08)}
+.ten-ends{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-3);font-weight:700;margin-top:3px}
+.tlx-row{padding:10px 0 4px;border-top:2px dashed var(--line)}
+.tlx-row:first-of-type{border-top:0}
+.tlx-row .lbl{font-size:14px;font-weight:700}
+.tlx-row.miss .lbl{color:var(--pink-d)}
+.opts{display:flex;flex-direction:column;gap:7px;margin-top:10px}
+.opts.inline{flex-direction:row;flex-wrap:wrap}
+.opt{border:2px solid var(--line-2);background:#FFFCFA;border-radius:14px;padding:10px 12px;font-weight:700;text-align:left;display:flex;gap:10px;align-items:center}
+.opt i{width:18px;height:18px;border-radius:50%;border:2px solid var(--line-2);flex:none;background:#fff}
+.opt.sq i{border-radius:6px}
+.opt[aria-pressed="true"]{border-color:var(--c);background:var(--cl)}
+.opt[aria-pressed="true"] i{background:var(--c);border-color:var(--c);box-shadow:inset 0 0 0 3px #fff}
+.opts.inline .opt{flex:1 1 120px}
+input.f, textarea.f{width:100%;margin-top:10px;border:2px solid var(--line-2);border-radius:14px;padding:11px 12px;font:inherit;background:#FFFCFA;color:var(--ink)}
+input.f:focus, textarea.f:focus{outline:none;border-color:var(--c);box-shadow:0 0 0 4px var(--cl)}
+textarea.f{min-height:96px;resize:vertical}
+.err{color:var(--pink-d);font-size:13px;font-weight:700;margin-top:6px}
+.daygrid{margin-top:10px;display:grid;grid-template-columns:52px repeat(4,1fr);gap:5px;font-size:12px;font-weight:700}
+.daygrid .h{color:var(--ink-3);text-align:center;align-self:end}
+.daygrid .d{align-self:center;color:var(--ink-2)}
+.daygrid button{border:2px solid var(--line-2);background:#FFFCFA;border-radius:10px;height:34px}
+.daygrid button[aria-pressed="true"]{background:var(--c);border-color:var(--c)}
+.none-btn{margin-top:8px}
+
+/* Bottom nav */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:15;background:linear-gradient(transparent,var(--cream) 30%);padding:26px 0 calc(12px + env(safe-area-inset-bottom))}
+.nav-in{max-width:640px;margin:0 auto;padding:0 16px;display:flex;gap:10px;align-items:center}
+.nav .count{font-size:13px;font-weight:800;color:var(--ink-2);white-space:nowrap}
+.nav .btn{flex:1}
+
+/* Overlay */
+.overlay{position:fixed;inset:0;z-index:50;background:rgba(58,36,64,.38);display:grid;place-items:center;padding:20px;animation:fade .2s}
+@keyframes fade{from{opacity:0}}
+.pop{background:var(--paper);border-radius:28px;padding:26px 22px;text-align:center;max-width:340px;width:100%;box-shadow:0 20px 60px -20px rgba(58,36,64,.6);animation:pop .45s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{from{transform:scale(.6);opacity:0}}
+.pop .big{width:96px;height:96px;margin:0 auto 6px;display:block;animation:spin-in .7s cubic-bezier(.3,1.6,.5,1)}
+@keyframes spin-in{from{transform:rotate(-200deg) scale(.2)}}
+.sparkle{position:fixed;pointer-events:none;z-index:60;width:10px;height:10px;border-radius:2px;animation:fly 1s ease-out forwards}
+@keyframes fly{to{transform:translate(var(--dx),var(--dy)) rotate(260deg);opacity:0}}
+
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:99px;font-weight:700;font-size:14px;z-index:40;max-width:min(90vw,340px);width:max-content;text-align:center;animation:fade .2s}
+
+/* Review & done */
+.rev{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:2px dashed var(--line)}
+.rev:first-child{border-top:0}
+.rev svg{width:34px;height:34px;flex:none}
+.rev .t{flex:1;font-weight:700}
+.rev .t small{display:block;font-weight:600;color:var(--ink-2)}
+.done-hero{text-align:center;padding-top:24px}
+.done-hero .bracelet{max-width:420px;margin:0 auto}
+.notice{background:var(--butter-l);border:2px solid var(--butter);border-radius:16px;padding:10px 14px;font-size:14px}
+.gbtn{display:flex;justify-content:center;min-height:44px}
+footer{text-align:center;font-size:12px;color:var(--ink-3);margin-top:28px}
+@media (max-width:380px){
+  .lik button{font-size:10.5px}
+  .ten button{font-size:12.5px;border-radius:8px}
+  .hero h1{font-size:29px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top" id="top" hidden>
+  <div class="top-in">
+    <div class="top-row">
+      <div class="brand"><span id="topTitle">Gelang Pesona</span></div>
+      <div class="who"><span id="whoEmail"></span><button class="chip-btn" id="logoutBtn">Keluar</button></div>
+    </div>
+    <div id="braceletTop"></div>
+  </div>
+</header>
+<main class="wrap" id="app"></main>
+<div class="nav" id="nav" hidden><div class="nav-in" id="navIn"></div></div>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+"use strict";
+/* ---------- Config ---------- */
+const CFG = Object.assign({
+  clientId: "", scriptUrl: "", allowedDomain: "p3md.sbm-itb.ac.id",
+  organizer: "Bidang SDM Senat P3MD", sdmContact: { name: "Bidang SDM", wa: "" },
+  dataNotice: "Jawaban mentah hanya dibuka oleh tim pengolah Bidang SDM. Hasil dilaporkan secara agregat, tidak per orang."
+}, window.APP_CONFIG || {});
+const PREVIEW = !CFG.clientId;
+
+/* ---------- Charms (SVG drawn in a 40x40 box) ---------- */
+const CHARM_PATHS = {
+  star:  '<path d="M20 4.5l4.6 9.6 10.4 1.4-7.6 7.2 1.9 10.4L20 28.1l-9.3 5 1.9-10.4L5 15.5l10.4-1.4z"/>',
+  cloud: '<path d="M12 31c-4.4 0-7.5-3-7.5-6.8 0-3.6 2.8-6.4 6.3-6.7C11.6 12.6 15.4 9 20.2 9c4.4 0 8 2.9 9.1 7 3.7.3 6.2 3.3 6.2 6.9 0 4.3-3.3 8.1-7.8 8.1z"/>',
+  heart: '<path d="M20 34.5S5 25.8 5 15.6C5 10.8 8.6 7 13.1 7c3 0 5.4 1.6 6.9 4 1.5-2.4 3.9-4 6.9-4C31.4 7 35 10.8 35 15.6c0 10.2-15 18.9-15 18.9z"/>',
+  bolt:  '<path d="M23.5 3.5L8 22.5h10l-2.5 14L32 16.5H21.5z"/>',
+  flower:'<g><circle cx="20" cy="11" r="6.5"/><circle cx="28.6" cy="17.2" r="6.5"/><circle cx="25.3" cy="27.4" r="6.5"/><circle cx="14.7" cy="27.4" r="6.5"/><circle cx="11.4" cy="17.2" r="6.5"/></g><circle cx="20" cy="20" r="5" fill="#FFF6D8" stroke="none"/>',
+  moon:  '<path d="M26.5 5.5A14.5 14.5 0 1 0 34.5 27 12 12 0 0 1 26.5 5.5z"/>',
+  letter:'<path d="M6 11.5h28a2 2 0 0 1 2 2V29a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V13.5a2 2 0 0 1 2-2z"/><path d="M5 13l15 10.5L35 13" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/>'
+};
+function charmSVG(shape, color, opts = {}) {
+  const filled = opts.filled !== false;
+  const fill = filled ? color : "#fff";
+  const stroke = filled ? "rgba(58,36,64,.55)" : "#D9C2BA";
+  const shine = filled ? '<ellipse cx="14" cy="13" rx="3.2" ry="2" fill="#fff" opacity=".6" transform="rotate(-30 14 13)" stroke="none"/>' : "";
+  const dash = filled ? "" : ' stroke-dasharray="3 3"';
+  return `<svg viewBox="0 0 40 40" aria-hidden="true"><g fill="${fill}" stroke="${stroke}" stroke-width="2" stroke-linejoin="round"${dash}>${CHARM_PATHS[shape]}</g>${shine}</svg>`;
+}
+
+/* ---------- Scales ---------- */
+const SCALES = {
+  freq: ["Tidak pernah", "Jarang", "Kadang-kadang", "Sering", "Selalu"],
+  size: ["Sangat kecil", "Kecil", "Cukup", "Besar", "Sangat besar"],
+  time: ["Tidak sama sekali", "Sebagian kecil waktu", "Sebagian waktu", "Sebagian besar waktu", "Sepanjang waktu"]
+};
+const SCALE_Q = { freq: "Seberapa sering Anda mengalaminya?", size: "Seberapa besar Anda merasakannya?", time: "Seberapa sering selama 4 minggu terakhir?" };
+
+/* ---------- Helpers for branching ---------- */
+const ROLE_NONE = "Tidak ada";
+const hasRole = a => Array.isArray(a.peran) && a.peran.length > 0 && !a.peran.includes(ROLE_NONE);
+const PHONE = { pattern: "^62\\d{8,13}$", msg: "Awali dengan 62, lalu 8–13 angka. Contoh: 6281234567890" };
+
+/* ---------- Survey content ----------
+   Item fields: k (answer key), t (type), q (question), h (hint), opt (optional),
+   show(answers) for branching. Likert items carry their scale. */
+const L = (k, q, scale) => ({ k, t: "lik", q, scale });
+
+const ACTS = [
+  { k: "kelas", label: "Kegiatan kelas dan perkuliahan" },
+  { k: "tugas", label: "Tugas individu dan tugas sindikat di luar jam kelas" },
+  { k: "fisik", label: "Kegiatan fisik, latihan, dan apel" },
+  { k: "peran", label: "Peran tambahan (Senat, kepanitiaan, ketua kelas, sindikat, atau ALP)", show: hasRole }
+];
+const DIMS = [
+  { k: "pikir", label: "Menuntut berpikir, mengingat, dan mengambil keputusan" },
+  { k: "fisik", label: "Berat tuntutan fisiknya" },
+  { k: "waktu", label: "Merasa diburu waktu" },
+  { k: "usaha", label: "Harus berusaha keras" }
+];
+
+const SECTIONS = [
+  { id: "diri", name: "Bintang", charm: "star", color: "--butter", light: "--butter-l", short: "Diri",
+    title: "Data Diri", intro: "Isi data diri Anda dulu, ya. Data ini dijaga kerahasiaannya.",
+    blocks: [
+      { items: [
+        { k: "nama", t: "text", q: "Nama lengkap", h: "Huruf kapital, tanpa gelar.", upper: true, pattern: "^[A-Z][A-Z .,'-]*$", msg: "Gunakan huruf saja, tanpa angka atau gelar." },
+        { k: "no_serdik", t: "text", q: "No Serdik", h: "3 digit, misalnya 008.", mode: "numeric", pattern: "^\\d{3}$", msg: "No Serdik harus tepat 3 angka." },
+        { k: "tgl_lahir", t: "date", q: "Tanggal lahir" },
+        { k: "no_wa", t: "tel", q: "No WA aktif", h: "Pakai 62, contoh 6281234567890.", pattern: PHONE.pattern, msg: PHONE.msg },
+        { k: "no_darurat", t: "tel", q: "No kontak darurat", h: "Pakai 62, contoh 6281234567890.", pattern: PHONE.pattern, msg: PHONE.msg },
+        { k: "relasi_darurat", t: "choice", q: "Hubungan dengan kontak darurat", options: ["Ayah", "Ibu", "Wali", "Kakak/Adik"], other: true, inline: true },
+        { k: "kepemimpinan", t: "choice", q: "Apakah Anda punya pengalaman kepemimpinan?", options: ["Ya", "Tidak"], inline: true },
+        { k: "kepemimpinan_detail", t: "long", q: "Sebutkan pengalaman kepemimpinan Anda.", show: a => a.kepemimpinan === "Ya" },
+        { k: "kompetensi", t: "long", q: "Sebutkan kompetensi atau keahlian yang Anda miliki." },
+        { k: "training", t: "long", q: "Sebutkan pengalaman pelatihan dan sertifikasi yang pernah Anda ikuti.", h: "Tulis \"-\" bila belum ada." },
+        { k: "prestasi", t: "long", q: "Sebutkan prestasi atau karya yang pernah Anda torehkan.", h: "Tulis \"-\" bila belum ada." },
+        { k: "usaha", t: "choice", q: "Apakah Anda punya pengalaman usaha?", options: ["Ya", "Tidak"], inline: true },
+        { k: "usaha_detail", t: "long", q: "Ceritakan usaha yang pernah Anda jalankan dan berapa lama.", show: a => a.usaha === "Ya" },
+        { k: "seni", t: "multi", q: "Apakah Anda punya minat dan bakat di bidang seni?", h: "Boleh memilih lebih dari satu.", options: ["Seni musik", "Seni tari", "Seni sastra", "Seni rupa", "Seni teater", "Seni media"], none: "Tidak ada", other: true },
+        { k: "peran", t: "multi", q: "Peran tambahan yang Anda jalani selama pendidikan", h: "Boleh memilih lebih dari satu.", options: ["Senat", "Ketua kelas, sindikat, atau ALP", "Panitia kegiatan"], none: ROLE_NONE, other: true },
+        { k: "peran_jam", t: "choice", q: "Rata-rata waktu per minggu untuk peran tambahan di luar jadwal resmi", options: ["1–5 jam", "6–10 jam", "Lebih dari 10 jam"], show: hasRole }
+      ] }
+    ] },
+
+  { id: "tuntutan", name: "Awan", charm: "cloud", color: "--sky", light: "--sky-l", short: "Tuntutan",
+    title: "Tuntutan Kegiatan", intro: "Gambarkan kondisi selama Anda mengikuti pendidikan. Pilih jawaban yang paling sesuai dengan pengalaman Anda.",
+    blocks: [
+      { head: "Beban dan tempo", scale: "freq", items: [
+        L("qd1", "Beban tugas saya tidak merata sehingga menumpuk pada waktu tertentu.", "freq"),
+        L("qd2", "Saya tidak sempat menyelesaikan semua tugas.", "freq"),
+        L("qd3", "Saya tertinggal dalam menyelesaikan tugas.", "freq"),
+        L("wp1", "Saya harus mengerjakan tugas dengan sangat cepat.", "freq"),
+        L("wp2", "Saya dituntut berkegiatan dalam jam yang panjang.", "freq"),
+        L("rc1", "Berbagai pihak menuntut hal-hal dari saya yang sulit dipenuhi secara bersamaan.", "freq"),
+        L("rest1", "Saya tidak mendapat waktu istirahat yang cukup.", "freq")
+      ] },
+      { head: "Kegiatan pendidikan menuntut saya untuk…", scale: "freq", items: [
+        L("cd1", "…memperhatikan banyak hal sekaligus.", "freq"),
+        L("cd2", "…mengingat banyak hal.", "freq"),
+        L("cd3", "…memunculkan gagasan baru.", "freq"),
+        L("cd4", "…mengambil keputusan yang sulit.", "freq")
+      ] },
+      { head: "Situasi emosional", scale: "freq", items: [
+        L("ed1", "Saya berada pada situasi yang mengganggu secara emosional.", "freq"),
+        L("ed2", "Saya perlu ikut menangani masalah pribadi orang lain, misalnya sebagai ketua atau pengurus.", "freq"),
+        L("ed3", "Kegiatan pendidikan menuntut saya untuk tidak menyampaikan pendapat.", "freq")
+      ] },
+      { head: "Beban perasaan", scale: "size", items: [
+        L("es1", "Kegiatan pendidikan terasa berat secara emosional.", "size"),
+        L("es2", "Kegiatan pendidikan menuntut saya menyembunyikan perasaan.", "size"),
+        L("es3", "Saya dituntut tetap ramah dan terbuka kepada siapa pun, apa pun sikap mereka kepada saya.", "size")
+      ] }
+    ] },
+
+  { id: "bersama", name: "Hati", charm: "heart", color: "--pink", light: "--pink-l", short: "Bersama",
+    title: "Kendali & Kebersamaan", intro: "Seberapa leluasa Anda mengatur diri, dan bagaimana kebersamaan dengan sesama Serdik?",
+    blocks: [
+      { head: "Mengatur diri", scale: "freq", items: [
+        L("inf1", "Saya dapat menentukan kapan beristirahat.", "freq"),
+        L("inf2", "Saya dapat mengatur kecepatan saya dalam mengerjakan tugas.", "freq")
+      ] },
+      { head: "Dukungan sesama Serdik", scale: "freq", items: [
+        L("sup1", "Saya mendapat bantuan dan dukungan dari sesama Serdik ketika membutuhkannya.", "freq"),
+        L("sup2", "Sesama Serdik bersedia mendengarkan masalah saya terkait pendidikan.", "freq"),
+        L("sup3", "Sesama Serdik memberi masukan tentang seberapa baik saya menjalankan tugas.", "freq")
+      ] },
+      { head: "Suasana komunitas", scale: "freq", items: [
+        L("com1", "Ada suasana yang baik antara saya dan sesama Serdik.", "freq"),
+        L("com2", "Ada kerja sama yang baik di antara sesama Serdik.", "freq"),
+        L("com3", "Saya merasa menjadi bagian dari komunitas Serdik.", "freq"),
+        L("com4", "Saya menerima perkataan atau perlakuan yang tidak menyenangkan dari sesama Serdik.", "freq")
+      ] }
+    ] },
+
+  { id: "beban", name: "Petir", charm: "bolt", color: "--peach", light: "--peach-l", short: "Beban",
+    title: "Beban per Kegiatan", intro: "Ingat kembali kegiatan Anda dua minggu terakhir, lalu beri nilai 0–10 untuk setiap kegiatan. 0 = sangat rendah, 10 = sangat tinggi.",
+    blocks: [
+      { items: [
+        { k: "tlx_kelas", t: "tlx", act: ACTS[0] },
+        { k: "tlx_tugas", t: "tlx", act: ACTS[1] },
+        L("att1", "Pilih jawaban \"Jarang\" untuk pertanyaan ini.", "freq"),
+        { k: "tlx_fisik", t: "tlx", act: ACTS[2] },
+        { k: "tlx_peran", t: "tlx", act: ACTS[3], show: hasRole }
+      ] }
+    ] },
+
+  { id: "makna", name: "Bunga", charm: "flower", color: "--mint", light: "--mint-l", short: "Makna",
+    title: "Makna & Kehidupan Pribadi", intro: "Seberapa bermakna kegiatan Anda, dan bagaimana pengaruhnya pada kehidupan pribadi dan keluarga?",
+    blocks: [
+      { head: "Makna kegiatan", scale: "size", items: [
+        L("mean1", "Kegiatan pendidikan yang saya jalani bermakna bagi saya.", "size"),
+        L("mean2", "Kegiatan yang saya lakukan terasa penting.", "size")
+      ] },
+      { head: "Variasi kegiatan", scale: "freq", items: [
+        L("var1", "Kegiatan pendidikan saya bervariasi.", "freq"),
+        L("var2", "Saya harus melakukan hal yang sama secara berulang-ulang.", "freq")
+      ] },
+      { head: "Pendidikan dan kehidupan pribadi", note: "Termasuk keluarga dan urusan pribadi.", scale: "freq", items: [
+        L("wfc1", "Ada saat-saat ketika saya perlu menjalani kegiatan pendidikan dan mengurus urusan keluarga atau pribadi pada waktu yang bersamaan.", "freq")
+      ] },
+      { scale: "size", items: [
+        L("wfc2", "Kegiatan pendidikan menyita begitu banyak tenaga saya sehingga berdampak buruk pada kehidupan pribadi saya.", "size"),
+        L("wfc3", "Kegiatan pendidikan menyita begitu banyak waktu saya sehingga berdampak buruk pada kehidupan pribadi saya.", "size"),
+        L("wfc4", "Tuntutan kegiatan pendidikan mengganggu kehidupan pribadi dan keluarga saya.", "size"),
+        L("wfc5", "Karena kegiatan pendidikan, saya harus mengubah rencana kegiatan pribadi atau keluarga.", "size")
+      ] }
+    ] },
+
+  { id: "kondisi", name: "Bulan", charm: "moon", color: "--lilac", light: "--lilac-l", short: "Kondisi",
+    title: "Kondisi Diri", intro: "Bagaimana kondisi Anda selama 4 minggu terakhir? Jawab tentang keadaan Anda secara umum, baik yang berkaitan dengan pendidikan maupun tidak.",
+    blocks: [
+      { items: [
+        { k: "gh", t: "choice", q: "Secara umum, bagaimana Anda menilai kesehatan Anda?", options: ["Sangat baik sekali", "Sangat baik", "Baik", "Cukup", "Buruk"] }
+      ] },
+      { head: "Selama 4 minggu terakhir, seberapa sering Anda…", scale: "time", items: [
+        L("bo1", "…merasa kehabisan tenaga?", "time"),
+        L("bo2", "…merasa sangat lelah secara fisik?", "time"),
+        L("bo3", "…merasa sangat lelah secara emosional?", "time"),
+        L("bo4", "…merasa letih?", "time"),
+        L("st1", "…sulit bersantai?", "time"),
+        L("st2", "…mudah tersinggung?", "time"),
+        L("st3", "…merasa tegang?", "time")
+      ] },
+      { head: "Tidur dan keluhan tubuh", scale: "time", items: [
+        L("sl1", "…tidur tidak nyenyak dan gelisah?", "time"),
+        L("sl2", "…sulit tertidur?", "time"),
+        L("sl3", "…terbangun terlalu pagi dan tidak dapat tidur kembali?", "time"),
+        L("sl4", "…terbangun beberapa kali di malam hari dan sulit tidur kembali?", "time"),
+        L("so1", "…mengalami sakit perut?", "time"),
+        L("so2", "…mengalami sakit kepala?", "time"),
+        L("so3", "…merasakan jantung berdebar-debar?", "time"),
+        L("so4", "…merasakan otot tegang atau kaku di beberapa bagian tubuh?", "time")
+      ] },
+      { items: [
+        { k: "jam_tidur", t: "choice", q: "Selama dua minggu terakhir, rata-rata berapa jam Anda benar-benar tidur setiap malam pada hari kegiatan?",
+          options: ["Kurang dari 3 jam", "3 sampai kurang dari 4 jam", "4 sampai kurang dari 5 jam", "5 sampai kurang dari 6 jam", "6 jam atau lebih"] }
+      ] }
+    ] },
+
+  { id: "cerita", name: "Surat", charm: "letter", color: "--rose", light: "--rose-l", short: "Cerita",
+    title: "Cerita Anda", intro: "Hampir selesai! Ceritakan sesuai yang Anda rasakan, sesingkat atau sepanjang yang Anda mau. Kalau tidak ada yang ingin disampaikan, cukup tulis \"tidak ada\".",
+    blocks: [
+      { items: [
+        { k: "open_berat", t: "long", q: "Kegiatan atau bagian jadwal apa yang paling menyita tenaga Anda? Mengapa?" },
+        { k: "kurang_istirahat", t: "days", q: "Pada hari dan waktu apa Anda paling merasa kurang istirahat?", h: "Ketuk semua kotak yang sesuai." },
+        { k: "kurang_istirahat_catatan", t: "long", q: "Ada catatan soal waktu itu?", h: "Misalnya jam tepatnya atau kegiatan yang berlangsung.", opt: true },
+        { k: "open_penyesuaian", t: "long", q: "Penyesuaian apa yang menurut Anda paling membantu?", h: "Misalnya pengurangan kegiatan, jeda antarkegiatan, tambahan waktu istirahat, atau variasi kegiatan." },
+        { k: "open_membantu", t: "long", q: "Kegiatan atau agenda apa yang saat ini sangat membantu Anda?", h: "Misalnya agenda yang membuat Anda lebih segar, kompak, atau terbantu belajar." },
+        { k: "open_lain", t: "long", q: "Ceritakan hal apa pun yang ingin Anda sampaikan.", opt: true }
+      ] }
+    ] }
+];
+
+const DAYS = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
+const TIMES = ["Pagi", "Siang", "Sore", "Malam"];
+
+/* ---------- State & storage ---------- */
+let user = null;          // { email, name, idToken }
+let S = { answers: {}, step: "welcome" };
+const store = {
+  key: () => "gelang-pesona:v1:" + (user ? user.email : "anon"),
+  load() { try { const v = localStorage.getItem(this.key()); return v ? JSON.parse(v) : null; } catch (e) { return null; } },
+  save() { try { localStorage.setItem(this.key(), JSON.stringify(S)); } catch (e) {} },
+  clear() { try { localStorage.removeItem(this.key()); } catch (e) {} }
+};
+let saveTimer = null;
+const saveSoon = () => { clearTimeout(saveTimer); saveTimer = setTimeout(() => store.save(), 300); };
+
+/* ---------- Item model ---------- */
+const allItems = sec => sec.blocks.flatMap(b => b.items);
+const visible = it => !it.show || it.show(S.answers);
+function units(it) {
+  // Answer slots an item contributes to progress.
+  if (it.t === "tlx") return DIMS.map(d => `${it.k}_${d.k}`);
+  return [it.k];
+}
+function filled(it) {
+  const a = S.answers;
+  if (it.t === "tlx") return units(it).every(k => a[k] !== undefined && a[k] !== "");
+  const v = a[it.k];
+  if (it.t === "multi") {
+    if (!Array.isArray(v) || !v.length) return false;
+    return !(v.includes("__other") && !(a[it.k + "_other"] || "").trim());
+  }
+  if (it.t === "days") return Array.isArray(v) && v.length > 0;
+  if (it.t === "choice" && v === "__other") return !!(a[it.k + "_other"] || "").trim();
+  return v !== undefined && String(v).trim() !== "";
+}
+function invalid(it) {
+  const v = S.answers[it.k];
+  if (!it.pattern || v === undefined || v === "") return "";
+  return new RegExp(it.pattern).test(String(v).trim()) ? "" : it.msg;
+}
+const okItem = it => !visible(it) || it.opt || (filled(it) && !invalid(it));
+function secProgress(sec) {
+  let done = 0, total = 0;
+  for (const it of allItems(sec)) {
+    if (!visible(it) || it.opt) continue;
+    if (it.t === "tlx") { const u = units(it); total += u.length; done += u.filter(k => S.answers[k] !== undefined).length; }
+    else { total++; if (filled(it) && !invalid(it)) done++; }
+  }
+  return { done, total, complete: done === total };
+}
+
+/* ---------- Bracelet ---------- */
+function bracelet(current, opts = {}) {
+  const W = 360, n = SECTIONS.length;
+  const pts = SECTIONS.map((s, i) => {
+    const t = (i + 0.5) / n, x = 14 + t * (W - 28);
+    const y = 10 + Math.sin(t * Math.PI) * 16;
+    return { x, y };
+  });
+  const chain = `M4 8 Q ${W / 2} 46 ${W - 4} 8`;
+  let g = "";
+  SECTIONS.forEach((s, i) => {
+    const p = pts[i];
+    const pr = opts.allDone ? { complete: true } : secProgress(s);
+    const got = opts.allDone || (S.collected || []).includes(s.id);
+    const col = getComputedStyle(document.documentElement).getPropertyValue(s.color).trim();
+    const now = i === current;
+    g += `<g class="slot${now ? " now" : ""}" style="transform-origin:${p.x}px ${p.y}px">
+      <line x1="${p.x}" y1="${p.y}" x2="${p.x}" y2="${p.y + 7}" stroke="#C9A98E" stroke-width="2"/>
+      <circle cx="${p.x}" cy="${p.y}" r="3" fill="#fff" stroke="#C9A98E" stroke-width="2"/>
+      <g transform="translate(${p.x - 15} ${p.y + 6}) scale(.75)">${charmSVG(s.charm, col, { filled: got }).replace("<svg", '<svg width="40" height="40"')}</g>
+      ${now && !got ? `<circle cx="${p.x}" cy="${p.y + 21}" r="17" fill="none" stroke="#EBD9CF" stroke-width="2.5"/>` : ""}
+      ${now && !got ? `<circle cx="${p.x}" cy="${p.y + 21}" r="17" fill="none" stroke="${col}" stroke-width="2.5" stroke-dasharray="${(pr.total ? pr.done / pr.total : 0) * 107} 107" transform="rotate(-90 ${p.x} ${p.y + 21})"/>` : ""}
+    </g>`;
+  });
+  return `<svg class="bracelet" viewBox="0 0 ${W} 64" role="img" aria-label="Gelang pesona: ${(S.collected || []).length} dari ${n} terkumpul">
+    <path d="${chain}" fill="none" stroke="#E2C9B5" stroke-width="5" stroke-linecap="round"/>
+    <path d="${chain}" fill="none" stroke="#C9A98E" stroke-width="2" stroke-dasharray="5 4" stroke-linecap="round"/>
+    ${g}</svg>`;
+}
+
+/* ---------- Rendering ---------- */
+const $app = document.getElementById("app");
+const $top = document.getElementById("top");
+const $nav = document.getElementById("nav");
+const $navIn = document.getElementById("navIn");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const secIndex = id => SECTIONS.findIndex(s => s.id === id);
+
+function setTheme(sec) {
+  const r = document.documentElement.style;
+  r.setProperty("--c", sec ? `var(${sec.color})` : "var(--pink)");
+  r.setProperty("--cl", sec ? `var(${sec.light})` : "var(--pink-l)");
+}
+function topBar(current) {
+  $top.hidden = false;
+  document.getElementById("whoEmail").textContent = user ? user.email : "";
+  document.getElementById("braceletTop").innerHTML = bracelet(current);
+}
+function go(step) {
+  S.step = step; store.save();
+  document.querySelectorAll(".toast").forEach(t => t.remove());
+  render(); window.scrollTo({ top: 0 });
+}
+
+function render() {
+  const step = S.step;
+  if (!user) return renderLogin();
+  if (S.submitted) return renderDone();
+  if (step === "welcome") return renderWelcome();
+  if (step === "consent") return renderConsent();
+  if (step === "declined") return renderDeclined();
+  if (step === "review") return renderReview();
+  const i = secIndex(step);
+  if (i >= 0) return renderSection(i);
+  S.step = "welcome"; renderWelcome();
+}
+
+function renderLogin() {
+  $top.hidden = true; $nav.hidden = true; setTheme(null);
+  $app.innerHTML = `
+    <section class="hero">
+      <div class="hero-charms">${SECTIONS.map(s => charmSVG(s.charm, cssVar(s.color))).join("")}</div>
+      <h1>Gelang <em>Pesona</em> Serdik</h1>
+      <p class="muted">Kuesioner Beban Kegiatan dan Kesejahteraan Serdik<br>${esc(CFG.organizer)}</p>
+    </section>
+    <section class="card stack" style="margin-top:18px">
+      ${PREVIEW ? `
+        <div class="notice"><b>Mode pratinjau.</b> Client ID Google belum diisi di <code>config.js</code>, jadi Anda bisa mencoba alurnya tanpa masuk. Jawaban tidak dikirim ke mana pun.</div>
+        <button class="btn block" id="previewBtn">Coba mode pratinjau</button>` : `
+        <p style="margin:0">Masuk dengan akun Google <b>@${esc(CFG.allowedDomain)}</b> untuk mulai merangkai gelang Anda.</p>
+        <div class="gbtn" id="gbtn"></div>
+        <p class="small muted" style="margin:0">Satu akun hanya bisa mengirim satu kali. Draf tersimpan di perangkat ini dan bisa dilanjutkan kapan saja.</p>
+        <div class="err" id="loginErr" hidden></div>`}
+    </section>
+    <footer>${esc(CFG.organizer)} · <a href="privacy.html" style="color:inherit">Kebijakan privasi</a></footer>`;
+  if (PREVIEW) {
+    document.getElementById("previewBtn").onclick = () => signedIn({ email: "pratinjau@" + CFG.allowedDomain, name: "", idToken: "" });
+  } else initGoogle();
+}
+
+function renderWelcome() {
+  setTheme(null); topBar(-1); $nav.hidden = true;
+  const started = Object.keys(S.answers).length > 0;
+  const total = SECTIONS.reduce((n, s) => n + allItems(s).reduce((m, it) => m + (it.opt ? 0 : units(it).length), 0), 0);
+  $app.innerHTML = `
+    <section class="hero">
+      <h1>Halo, rekan <em>Serdik</em>!</h1>
+      <p class="muted" style="margin:0 0 4px">Di tengah jadwal yang seru (dan kadang bikin ngos-ngosan), ${esc(CFG.organizer)} ingin mendengar langsung dari Anda: bagaimana kegiatan pendidikan selama ini terasa?</p>
+      <div class="facts"><span>± ${total} pertanyaan</span><span>± 15 menit</span><span>Draf tersimpan otomatis</span></div>
+    </section>
+    <section class="card stack" style="margin-top:14px">
+      <span class="eyebrow">Rangkai gelang Anda</span>
+      <p style="margin:0">Setiap bagian yang selesai memberi Anda satu pesona. Kumpulkan ketujuhnya untuk melengkapi gelang.</p>
+      <ol class="path">${SECTIONS.map(s => `<li>${charmSVG(s.charm, cssVar(s.color), { filled: (S.collected || []).includes(s.id) })}${esc(s.short)}</li>`).join("")}</ol>
+      <button class="btn block" id="startBtn">${started ? "Lanjutkan merangkai" : "Mulai merangkai"}</button>
+      ${started ? `<button class="link" id="restartBtn">Mulai dari awal</button>` : ""}
+    </section>
+    <section class="card stack" style="margin-top:14px">
+      <span class="eyebrow">Sebelum mulai</span>
+      <ul class="rules">
+        <li>Tidak ada jawaban benar atau salah. Jawablah sesuai yang Anda rasakan, bukan yang seharusnya.</li>
+        <li>Pesona dihitung dari bagian yang selesai diisi, bukan dari jawabannya. Jawaban apa pun bernilai sama.</li>
+        <li>${esc(CFG.dataNotice)}</li>
+        <li>Satu suara Anda ikut menentukan perbaikan untuk semua.</li>
+      </ul>
+    </section>
+    <footer>${esc(CFG.organizer)}</footer>`;
+  document.getElementById("startBtn").onclick = () => {
+    if (S.consent !== "Ya") return go("consent");
+    const firstOpen = SECTIONS.find(s => !(S.collected || []).includes(s.id));
+    go(firstOpen ? firstOpen.id : "review");
+  };
+  const rb = document.getElementById("restartBtn");
+  if (rb) rb.onclick = () => {
+    if (!confirm("Hapus semua jawaban di perangkat ini dan mulai dari awal?")) return;
+    S = { answers: {}, step: "welcome" }; store.save(); render();
+  };
+}
+
+function renderConsent() {
+  setTheme(null); topBar(-1); $nav.hidden = true;
+  $app.innerHTML = `
+    <section class="sec-head"><div class="badge" style="border-color:var(--pink)">${charmSVG("heart", cssVar("--pink"), { filled: false })}</div>
+      <div><span class="eyebrow">Persetujuan</span><h2>Apakah Anda bersedia mengisi kuesioner ini?</h2></div></section>
+    <section class="card stack" style="margin-top:16px">
+      <p style="margin:0">Hasilnya akan menjadi bahan untuk menata tempo dan kegiatan ke depan, supaya kita tetap semangat, sehat, dan makin solid.</p>
+      <p class="small muted" style="margin:0">${esc(CFG.dataNotice)}</p>
+      <div class="opts">
+        <button class="opt" data-consent="Ya"><i></i>Ya, saya bersedia</button>
+        <button class="opt" data-consent="Tidak"><i></i>Tidak</button>
+      </div>
+    </section>`;
+  $app.querySelectorAll("[data-consent]").forEach(b => b.onclick = () => {
+    S.consent = b.dataset.consent;
+    go(S.consent === "Ya" ? SECTIONS[0].id : "declined");
+  });
+}
+
+function renderDeclined() {
+  setTheme(null); topBar(-1); $nav.hidden = true;
+  $app.innerHTML = `
+    <section class="card stack" style="margin-top:24px;text-align:center">
+      <h2>Terima kasih sudah mampir</h2>
+      <p class="muted" style="margin:0">Tidak apa-apa. Jika berubah pikiran, Anda bisa kembali kapan saja.</p>
+      <button class="btn ghost block" id="backBtn">Saya berubah pikiran</button>
+    </section>`;
+  document.getElementById("backBtn").onclick = () => go("consent");
+}
+
+function scaleHeads(scale) { return SCALES[scale].map((l, i) => `${i + 1} ${l}`).join(" · "); }
+
+function itemHTML(it, n) {
+  const a = S.answers;
+  const req = it.opt ? ` <span class="muted small">(opsional)</span>` : "";
+  const head = `<div class="q-t"><span class="q-n">${n}</span><div>${esc(it.q || "")}${req}${it.h ? `<div class="q-h">${esc(it.h)}</div>` : ""}</div></div>`;
+  let body = "";
+  if (it.t === "lik") {
+    body = `<div class="lik" role="radiogroup" aria-label="${esc(it.q)}">${SCALES[it.scale].map((l, i) =>
+      `<button type="button" data-k="${it.k}" data-v="${i + 1}" aria-pressed="${a[it.k] === i + 1}"><i></i>${esc(l)}</button>`).join("")}</div>`;
+  } else if (it.t === "tlx") {
+    return `<div class="q" data-item="${it.k}"><div class="q-t"><span class="q-n">${n}</span><div>${esc(it.act.label)}<div class="q-h">0 = sangat rendah · 10 = sangat tinggi</div></div></div>
+      ${DIMS.map(d => { const k = `${it.k}_${d.k}`; return `<div class="tlx-row" data-row="${k}"><div class="lbl">${esc(d.label)}</div>
+        <div class="ten" role="radiogroup" aria-label="${esc(d.label)}">${Array.from({ length: 11 }, (_, v) =>
+          `<button type="button" data-k="${k}" data-v="${v}" aria-pressed="${a[k] === v}">${v}</button>`).join("")}</div>
+        <div class="ten-ends"><span>sangat rendah</span><span>sangat tinggi</span></div></div>`; }).join("")}</div>`;
+  } else if (it.t === "choice") {
+    body = `<div class="opts${it.inline ? " inline" : ""}" role="radiogroup">${it.options.map(o =>
+      `<button type="button" class="opt" data-k="${it.k}" data-s="${esc(o)}" aria-pressed="${a[it.k] === o}"><i></i>${esc(o)}</button>`).join("")}
+      ${it.other ? `<button type="button" class="opt" data-k="${it.k}" data-s="__other" aria-pressed="${a[it.k] === "__other"}"><i></i>Lainnya</button>` : ""}</div>
+      ${it.other ? `<input class="f" data-other="${it.k}" placeholder="Tulis di sini" value="${esc(a[it.k + "_other"] || "")}" ${a[it.k] === "__other" ? "" : "hidden"}>` : ""}`;
+  } else if (it.t === "multi") {
+    const v = a[it.k] || [];
+    const opts = [...it.options, ...(it.other ? ["__other"] : []), it.none];
+    body = `<div class="opts">${opts.map(o =>
+      `<button type="button" class="opt sq" data-k="${it.k}" data-m="${esc(o)}" aria-pressed="${v.includes(o)}"><i></i>${o === "__other" ? "Lainnya" : esc(o)}</button>`).join("")}</div>
+      ${it.other ? `<input class="f" data-other="${it.k}" placeholder="Tulis di sini" value="${esc(a[it.k + "_other"] || "")}" ${v.includes("__other") ? "" : "hidden"}>` : ""}`;
+  } else if (it.t === "long") {
+    body = `<textarea class="f" data-k="${it.k}" data-input placeholder="Tulis jawaban Anda">${esc(a[it.k] || "")}</textarea>`;
+  } else if (it.t === "days") {
+    const v = a[it.k] || [];
+    body = `<div class="daygrid"><span></span>${TIMES.map(t => `<span class="h">${t}</span>`).join("")}
+      ${DAYS.map(d => `<span class="d">${d.slice(0, 3)}</span>${TIMES.map(t => { const c = `${d} ${t}`;
+        return `<button type="button" data-k="${it.k}" data-d="${c}" aria-label="${c}" aria-pressed="${v.includes(c)}"></button>`; }).join("")}`).join("")}</div>
+      <button type="button" class="opt sq none-btn" data-k="${it.k}" data-d="Tidak ada" aria-pressed="${v.includes("Tidak ada")}"><i></i>Tidak ada waktu tertentu</button>`;
+  } else {
+    const type = it.t === "date" ? "date" : it.t === "tel" ? "tel" : "text";
+    const extra = it.t === "date" ? ` max="${new Date().toISOString().slice(0, 10)}"` : it.t === "tel" ? ` inputmode="numeric" placeholder="62…"` : it.mode ? ` inputmode="${it.mode}"` : "";
+    body = `<input class="f" type="${type}" data-k="${it.k}" data-input${extra} value="${esc(a[it.k] || "")}" autocomplete="off"${it.upper ? ' style="text-transform:uppercase"' : ""}>
+      <div class="err" data-err="${it.k}" ${invalid(it) ? "" : "hidden"}>${esc(invalid(it))}</div>`;
+  }
+  return `<div class="q${filled(it) && !invalid(it) ? " done" : ""}" data-item="${it.k}">${head}${body}</div>`;
+}
+
+function renderSection(i) {
+  const sec = SECTIONS[i];
+  setTheme(sec); topBar(i);
+  let n = 0, html = `
+    <section class="sec-head"><div class="badge">${charmSVG(sec.charm, cssVar(sec.color), { filled: (S.collected || []).includes(sec.id) })}</div>
+      <div><span class="eyebrow">Pesona ${i + 1} dari ${SECTIONS.length} · ${esc(sec.name)}</span><h2>${esc(sec.title)}</h2></div></section>
+    <p class="sec-intro muted">${esc(sec.intro)}</p>`;
+  for (const b of sec.blocks) {
+    if (b.head) html += `<div class="subhead"><h3>${esc(b.head)}</h3></div>${b.note ? `<p class="small muted" style="margin:-4px 2px 6px">${esc(b.note)}</p>` : ""}`;
+    else if (b.scale) html += `<div style="height:8px"></div>`;
+    for (const it of b.items) {
+      n++;
+      html += `<div data-wrap="${it.k}" ${visible(it) ? "" : "hidden"}>${itemHTML(it, n)}</div>`;
+    }
+  }
+  $app.innerHTML = html;
+  $nav.hidden = false;
+  updateNav();
+  syncVisibility();
+}
+
+function updateNav() {
+  const i = secIndex(S.step); if (i < 0) return;
+  const pr = secProgress(SECTIONS[i]);
+  $navIn.innerHTML = `
+    <button class="btn ghost" id="prevBtn" aria-label="Kembali" style="flex:0 0 auto;padding:13px 16px">←</button>
+    <span class="count">${pr.done}/${pr.total}</span>
+    <button class="btn" id="nextBtn">${i === SECTIONS.length - 1 ? "Periksa jawaban" : "Lanjut"} →</button>`;
+  document.getElementById("prevBtn").onclick = () => go(i === 0 ? "welcome" : SECTIONS[i - 1].id);
+  document.getElementById("nextBtn").onclick = () => tryNext(i);
+}
+
+function syncVisibility() {
+  const i = secIndex(S.step); if (i < 0) return;
+  for (const it of allItems(SECTIONS[i])) {
+    const w = $app.querySelector(`[data-wrap="${it.k}"]`);
+    if (w) w.hidden = !visible(it);
+  }
+}
+function refreshItem(k) {
+  const i = secIndex(S.step); if (i < 0) return;
+  const it = allItems(SECTIONS[i]).find(x => x.k === k || (x.t === "tlx" && k.startsWith(x.k + "_")));
+  if (!it) return;
+  const el = $app.querySelector(`[data-item="${it.k}"]`);
+  if (el) el.classList.toggle("done", filled(it) && !invalid(it));
+  if (el && filled(it)) el.classList.remove("miss");
+  syncVisibility(); updateNav();
+  document.getElementById("braceletTop").innerHTML = bracelet(i);
+}
+
+function tryNext(i) {
+  const sec = SECTIONS[i];
+  const missing = allItems(sec).filter(it => !okItem(it));
+  if (missing.length) {
+    $app.querySelectorAll(".q.miss").forEach(e => e.classList.remove("miss"));
+    missing.forEach(it => {
+      const el = $app.querySelector(`[data-item="${it.k}"]`);
+      if (!el) return;
+      void el.offsetWidth; el.classList.add("miss");
+      if (it.t === "tlx") units(it).forEach(k => {
+        const row = el.querySelector(`[data-row="${k}"]`);
+        if (row) row.classList.toggle("miss", S.answers[k] === undefined);
+      });
+      const e = el.querySelector("[data-err]"); if (e && invalid(it)) e.hidden = false;
+    });
+    const first = $app.querySelector(`[data-item="${missing[0].k}"]`);
+    if (first) first.scrollIntoView({ behavior: "smooth", block: "center" });
+    toast(missing.length === 1 ? "Masih ada 1 pertanyaan yang perlu diisi." : `Masih ada ${missing.length} pertanyaan yang perlu diisi.`);
+    return;
+  }
+  const next = i === SECTIONS.length - 1 ? "review" : SECTIONS[i + 1].id;
+  S.collected = S.collected || [];
+  if (!S.collected.includes(sec.id)) {
+    S.collected.push(sec.id); store.save();
+    celebrate(sec, () => go(next));
+  } else go(next);
+}
+
+/* ---------- Events ---------- */
+$app.addEventListener("click", e => {
+  const b = e.target.closest("button[data-k]"); if (!b) return;
+  const k = b.dataset.k, a = S.answers;
+  const wasFilled = a[k] !== undefined;
+  if (b.dataset.v !== undefined) {
+    a[k] = Number(b.dataset.v);
+    b.parentElement.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b));
+    if (!wasFilled) nudgeNext(b);
+  } else if (b.dataset.s !== undefined) {
+    a[k] = b.dataset.s;
+    b.parentElement.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b));
+    const oth = $app.querySelector(`[data-other="${k}"]`);
+    if (oth) { oth.hidden = a[k] !== "__other"; if (!oth.hidden) oth.focus(); }
+  } else if (b.dataset.m !== undefined) {
+    const it = findItem(k), val = b.dataset.m;
+    let v = Array.isArray(a[k]) ? a[k].slice() : [];
+    if (v.includes(val)) v = v.filter(x => x !== val);
+    else v = val === it.none ? [val] : [...v.filter(x => x !== it.none), val];
+    a[k] = v;
+    b.parentElement.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", v.includes(x.dataset.m)));
+    const oth = $app.querySelector(`[data-other="${k}"]`);
+    if (oth) { oth.hidden = !v.includes("__other"); if (!oth.hidden && val === "__other") oth.focus(); }
+  } else if (b.dataset.d !== undefined) {
+    const val = b.dataset.d;
+    let v = Array.isArray(a[k]) ? a[k].slice() : [];
+    if (v.includes(val)) v = v.filter(x => x !== val);
+    else v = val === "Tidak ada" ? [val] : [...v.filter(x => x !== "Tidak ada"), val];
+    a[k] = v;
+    b.closest(".q").querySelectorAll("button[data-d]").forEach(x => x.setAttribute("aria-pressed", v.includes(x.dataset.d)));
+  }
+  const row = b.closest(".tlx-row"); if (row) row.classList.remove("miss");
+  saveSoon(); refreshItem(k);
+});
+$app.addEventListener("input", e => {
+  const t = e.target;
+  if (t.dataset.other) { S.answers[t.dataset.other + "_other"] = t.value; saveSoon(); refreshItem(t.dataset.other); return; }
+  if (t.dataset.input === undefined) return;
+  const it = findItem(t.dataset.k);
+  let v = t.value;
+  if (it && it.upper) v = v.toUpperCase();
+  S.answers[t.dataset.k] = v; saveSoon();
+  const err = $app.querySelector(`[data-err="${t.dataset.k}"]`);
+  if (err && !err.hidden) { const m = invalid(it); err.textContent = m; err.hidden = !m; }
+  refreshItem(t.dataset.k);
+});
+$app.addEventListener("focusout", e => {
+  const t = e.target; if (t.dataset.input === undefined) return;
+  const it = findItem(t.dataset.k); const err = $app.querySelector(`[data-err="${t.dataset.k}"]`);
+  if (it && it.upper) { t.value = t.value.toUpperCase().replace(/\s+/g, " ").trim(); S.answers[it.k] = t.value; saveSoon(); refreshItem(it.k); }
+  if (err) { const m = invalid(it); err.textContent = m; err.hidden = !m; }
+});
+function findItem(k) { for (const s of SECTIONS) for (const it of allItems(s)) if (it.k === k) return it; return null; }
+function nudgeNext(btn) {
+  // After a first answer on a scale item, glide gently to the next unanswered one.
+  const cur = btn.closest(".q"); if (!cur || cur.querySelector(".tlx-row")) return;
+  const all = [...$app.querySelectorAll("[data-wrap]:not([hidden]) .q")];
+  const idx = all.indexOf(cur);
+  const nxt = all.slice(idx + 1).find(q => !q.classList.contains("done"));
+  if (nxt && nxt.querySelector(".lik")) setTimeout(() => nxt.scrollIntoView({ behavior: "smooth", block: "center" }), 180);
+}
+
+/* ---------- Review & submit ---------- */
+function renderReview() {
+  setTheme(null); topBar(SECTIONS.length); $nav.hidden = true;
+  const ready = SECTIONS.every(s => (S.collected || []).includes(s.id) && allItems(s).every(okItem));
+  $app.innerHTML = `
+    <section class="sec-head"><div class="badge">${charmSVG("heart", cssVar("--pink"))}</div>
+      <div><span class="eyebrow">Langkah terakhir</span><h2>Periksa lalu kirim</h2></div></section>
+    <section class="card" style="margin-top:16px">
+      ${SECTIONS.map((s, i) => { const p = secProgress(s); return `<div class="rev">${charmSVG(s.charm, cssVar(s.color), { filled: (S.collected || []).includes(s.id) })}
+        <div class="t">${esc(s.title)}<small>${p.done}/${p.total} terjawab</small></div>
+        <button class="chip-btn" data-goto="${s.id}">Ubah</button></div>`; }).join("")}
+    </section>
+    <section class="card stack" style="margin-top:14px">
+      <p style="margin:0">Setelah dikirim, jawaban <b>tidak bisa diubah lagi</b> dan akun ini tidak bisa mengirim ulang.</p>
+      ${PREVIEW ? `<div class="notice">Mode pratinjau: tombol di bawah hanya menyimulasikan pengiriman.</div>` : ""}
+      <button class="btn block" id="sendBtn" ${ready ? "" : "disabled"}>Kirim & lengkapi gelang</button>
+      <div class="err" id="sendErr" hidden></div>
+    </section>`;
+  $app.querySelectorAll("[data-goto]").forEach(b => b.onclick = () => go(b.dataset.goto));
+  document.getElementById("sendBtn").onclick = submit;
+}
+
+function payload() {
+  // Flattened, ordered answers plus a codebook so the sheet is self-describing.
+  const rows = [{ k: "persetujuan", label: "Persetujuan", value: S.consent }];
+  const pushVal = (k, label, value, codes) => rows.push({ k, label, value: value ?? "", codes: codes || "" });
+  for (const s of SECTIONS) for (const it of allItems(s)) {
+    const vis = visible(it), a = S.answers;
+    if (it.t === "tlx") { DIMS.forEach(d => pushVal(`${it.k}_${d.k}`, `${it.act.label} — ${d.label}`, vis ? a[`${it.k}_${d.k}`] : "", "0–10")); continue; }
+    let v = vis ? a[it.k] : "";
+    if (it.k === "peran_jam" && !hasRole(a)) v = "Tidak ada";
+    if (it.t === "choice" && v === "__other") v = "Lainnya: " + (a[it.k + "_other"] || "").trim();
+    if ((it.t === "multi" || it.t === "days") && Array.isArray(v)) v = v.map(x => x === "__other" ? "Lainnya: " + (a[it.k + "_other"] || "").trim() : x).join("; ");
+    if (typeof v === "string") v = v.trim();
+    pushVal(it.k, it.q, v, it.t === "lik" ? SCALES[it.scale].map((l, i) => `${i + 1}=${l}`).join(", ") : "");
+  }
+  return rows;
+}
+
+async function submit() {
+  const btn = document.getElementById("sendBtn"), err = document.getElementById("sendErr");
+  btn.disabled = true; btn.textContent = "Mengirim…"; err.hidden = true;
+  try {
+    if (PREVIEW) { await new Promise(r => setTimeout(r, 700)); }
+    else {
+      const res = await api({ action: "submit", idToken: user.idToken, rows: payload() });
+      if (!res.ok) {
+        if (res.code === "ALREADY") { S.submitted = true; store.save(); return render(); }
+        if (res.code === "AUTH") throw new Error("Sesi masuk sudah kedaluwarsa. Tekan Keluar, lalu masuk lagi; jawaban Anda tetap tersimpan.");
+        throw new Error(res.message || "Pengiriman gagal.");
+      }
+    }
+    S.submitted = true; S.submittedAt = new Date().toISOString(); store.save();
+    burst(window.innerWidth / 2, window.innerHeight / 2, 40);
+    render(); window.scrollTo({ top: 0 });
+  } catch (e) {
+    err.textContent = e.message || "Pengiriman gagal. Periksa koneksi lalu coba lagi."; err.hidden = false;
+    btn.disabled = false; btn.textContent = "Kirim & lengkapi gelang";
+  }
+}
+
+function renderDone() {
+  setTheme(null); $top.hidden = false; $nav.hidden = true;
+  document.getElementById("whoEmail").textContent = user.email;
+  document.getElementById("braceletTop").innerHTML = "";
+  const wa = (CFG.sdmContact.wa || "").replace(/\D/g, "");
+  $app.innerHTML = `
+    <section class="done-hero">
+      <span class="eyebrow">Gelang lengkap</span>
+      <h1 class="display" style="font-size:30px;margin:6px 0 2px">Terima kasih sudah berbagi dengan jujur</h1>
+      <div style="margin:14px auto 4px;max-width:420px">${bracelet(-1, { allDone: true })}</div>
+    </section>
+    <section class="card stack" style="margin-top:12px">
+      <p style="margin:0">Kami tahu hari-hari pendidikan tidak selalu ringan. Ada lelah yang tidak selalu terucap, ada semangat yang terus dijaga meski jadwal padat. Lewat jawaban Anda, kami bisa lebih memahami apa yang sebenarnya dirasakan, supaya langkah ke depan bisa diatur dengan lebih baik untuk kita semua.</p>
+      <p style="margin:0">Kalau ada yang ingin Anda ceritakan, tentang kesehatan, kelelahan, atau sekadar butuh teman bicara, silakan hubungi ${esc(CFG.sdmContact.name)} kapan saja.</p>
+      ${wa ? `<a class="btn block" style="text-align:center;text-decoration:none" href="https://wa.me/${wa}" target="_blank" rel="noopener">Hubungi ${esc(CFG.sdmContact.name)}</a>` : ""}
+      <p class="small muted" style="margin:0">Jaga diri baik-baik. Mari kita jalani ini bersama.</p>
+    </section>
+    ${PREVIEW ? `<p style="text-align:center"><button class="link" id="resetPreview">Ulangi pratinjau</button></p>` : ""}
+    <footer>${esc(CFG.organizer)}</footer>`;
+  const rp = document.getElementById("resetPreview");
+  if (rp) rp.onclick = () => { S = { answers: {}, step: "welcome" }; store.save(); render(); };
+}
+
+/* ---------- Effects ---------- */
+function cssVar(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+function toast(msg) {
+  document.querySelectorAll(".toast").forEach(t => t.remove());
+  const t = document.createElement("div"); t.className = "toast"; t.textContent = msg; t.setAttribute("role", "status");
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2600);
+}
+function burst(x, y, n = 22) {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const cols = ["--pink", "--butter", "--sky", "--mint", "--lilac", "--peach"].map(cssVar);
+  for (let i = 0; i < n; i++) {
+    const s = document.createElement("i"); s.className = "sparkle";
+    const ang = Math.random() * Math.PI * 2, d = 60 + Math.random() * 120;
+    s.style.cssText = `left:${x}px;top:${y}px;background:${cols[i % cols.length]};--dx:${Math.cos(ang) * d}px;--dy:${Math.sin(ang) * d}px;border-radius:${i % 2 ? "50%" : "2px"}`;
+    document.body.appendChild(s); setTimeout(() => s.remove(), 1000);
+  }
+}
+function celebrate(sec, then) {
+  const got = S.collected.length, n = SECTIONS.length;
+  const ov = document.createElement("div"); ov.className = "overlay";
+  ov.innerHTML = `<div class="pop" role="dialog" aria-live="polite">
+    <span class="big">${charmSVG(sec.charm, cssVar(sec.color))}</span>
+    <span class="eyebrow" style="color:${cssVar(sec.color)}">${got} dari ${n} pesona</span>
+    <h2 style="margin:4px 0 6px">Pesona ${esc(sec.name)} terkumpul!</h2>
+    <p class="muted" style="margin:0 0 16px">${got < n ? `Tinggal ${n - got} lagi untuk melengkapi gelang.` : "Semua pesona terkumpul. Tinggal periksa dan kirim."}</p>
+    <button class="btn block">${got < n ? "Lanjut" : "Periksa jawaban"}</button></div>`;
+  document.body.appendChild(ov);
+  const r = ov.querySelector(".big").getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2);
+  const close = () => { ov.remove(); then(); };
+  ov.querySelector("button").onclick = close;
+  ov.onclick = e => { if (e.target === ov) close(); };
+}
+
+/* ---------- Auth & API ---------- */
+function api(body) {
+  return fetch(CFG.scriptUrl, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(body) })
+    .then(r => r.json());
+}
+function decodeJwt(t) {
+  const p = t.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+  return JSON.parse(decodeURIComponent(atob(p).split("").map(c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)).join("")));
+}
+function initGoogle(tries = 0) {
+  if (!(window.google && google.accounts && google.accounts.id)) {
+    if (tries > 50) { const e = document.getElementById("loginErr"); if (e) { e.textContent = "Tombol Google gagal dimuat. Periksa koneksi lalu muat ulang halaman."; e.hidden = false; } return; }
+    return setTimeout(() => initGoogle(tries + 1), 150);
+  }
+  google.accounts.id.initialize({
+    client_id: CFG.clientId, hd: CFG.allowedDomain, auto_select: false, ux_mode: "popup",
+    callback: r => {
+      const c = decodeJwt(r.credential);
+      const err = document.getElementById("loginErr");
+      if (!c.email || !c.email.toLowerCase().endsWith("@" + CFG.allowedDomain)) {
+        err.textContent = `Gunakan akun @${CFG.allowedDomain}. Akun ${c.email} tidak bisa dipakai.`; err.hidden = false; return;
+      }
+      signedIn({ email: c.email.toLowerCase(), name: c.name || "", idToken: r.credential });
+    }
+  });
+  const host = document.getElementById("gbtn");
+  if (host) google.accounts.id.renderButton(host, { theme: "outline", size: "large", shape: "pill", text: "signin_with", locale: "id" });
+}
+async function signedIn(u) {
+  user = u;
+  S = store.load() || { answers: {}, step: "welcome" };
+  if (!S.answers.nama && u.name) S.answers.nama = u.name.toUpperCase();
+  if (!S.submitted && !PREVIEW && CFG.scriptUrl) {
+    try { const st = await api({ action: "status", idToken: u.idToken }); if (st.ok && st.submitted) { S.submitted = true; store.save(); } } catch (e) {}
+  }
+  S.step = S.submitted ? S.step : "welcome";
+  render();
+}
+document.getElementById("logoutBtn").onclick = () => {
+  store.save();
+  if (!PREVIEW && window.google && google.accounts) google.accounts.id.disableAutoSelect();
+  user = null; S = { answers: {}, step: "welcome" }; render();
+};
+
+render();
+</script>
+</body>
+</html>
