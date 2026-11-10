@@ -36,6 +36,8 @@ sent, and the submit button only simulates sending. Good for showing Bidang SDM.
 ## Changes from the Google Form (worth confirming with Bidang SDM)
 
 - Validation: No Serdik `^\d{3}$`, phone numbers `^62\d{8,13}$`, name in capitals.
+- Address fields after Tanggal lahir: alamat KTP, "sama dengan domisili?", and
+  alamat domisili only when "Tidak" (sent as "-" when "Ya", as the form asks).
 - Branching instead of "write -": leadership/business details only after "Ya";
   weekly hours and the "Peran tambahan" NASA-TLX rows only when a role is chosen.
   Hidden answers are sent empty; `peran_jam` is sent as "Tidak ada".

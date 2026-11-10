@@ -263,6 +263,9 @@ const SECTIONS = [
         { k: "nama", t: "text", q: "Nama lengkap", h: "Huruf kapital, tanpa gelar.", upper: true, pattern: "^[A-Z][A-Z .,'-]*$", msg: "Gunakan huruf saja, tanpa angka atau gelar." },
         { k: "no_serdik", t: "text", q: "No Serdik", h: "3 digit, misalnya 008.", mode: "numeric", pattern: "^\\d{3}$", msg: "No Serdik harus tepat 3 angka." },
         { k: "tgl_lahir", t: "date", q: "Tanggal lahir" },
+        { k: "alamat_ktp", t: "long", q: "Alamat KTP lengkap", h: "Jalan, nomor, RT/RW, kelurahan, kecamatan, kota/kabupaten, provinsi, kode pos." },
+        { k: "alamat_sama", t: "choice", q: "Apakah alamat KTP sama dengan alamat domisili?", options: ["Ya", "Tidak"], inline: true },
+        { k: "alamat_domisili", t: "long", q: "Alamat domisili lengkap", show: a => a.alamat_sama === "Tidak" },
         { k: "no_wa", t: "tel", q: "No WA aktif", h: "Pakai 62, contoh 6281234567890.", pattern: PHONE.pattern, msg: PHONE.msg },
         { k: "no_darurat", t: "tel", q: "No kontak darurat", h: "Pakai 62, contoh 6281234567890.", pattern: PHONE.pattern, msg: PHONE.msg },
         { k: "relasi_darurat", t: "choice", q: "Hubungan dengan kontak darurat", options: ["Ayah", "Ibu", "Wali", "Kakak/Adik"], other: true, inline: true },
@@ -886,6 +889,7 @@ function payload() {
     }
     let v = vis ? a[it.k] : "";
     if (it.k === "peran_jam" && !hasRole(a)) v = "Tidak ada";
+    if (it.k === "alamat_domisili" && a.alamat_sama === "Ya") v = "-";
     if (it.t === "choice" && v === "__other") v = "Lainnya: " + (a[it.k + "_other"] || "").trim();
     if ((it.t === "multi" || it.t === "days") && Array.isArray(v)) v = v.map(x => x === "__other" ? "Lainnya: " + (a[it.k + "_other"] || "").trim() : x).join("; ");
     if (typeof v === "string") v = v.trim();
