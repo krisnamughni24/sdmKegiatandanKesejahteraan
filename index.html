@@ -148,7 +148,11 @@ textarea.f{min-height:96px;resize:vertical}
 /* Bottom nav */
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:15;background:linear-gradient(transparent,var(--cream) 30%);padding:26px 0 calc(12px + env(safe-area-inset-bottom))}
 .nav-in{max-width:640px;margin:0 auto;padding:0 16px;display:flex;gap:10px;align-items:center}
-.nav .count{font-size:13px;font-weight:800;color:var(--ink-2);white-space:nowrap}
+.nav .count{font-size:13px;font-weight:800;color:var(--ink-2);white-space:nowrap;display:flex;flex-direction:column;align-items:center;line-height:1.2;min-width:62px}
+.save-st{border:0;background:none;padding:2px 0 0;font:700 10.5px/1.2 "Nunito",sans-serif;color:var(--ink-3);white-space:nowrap}
+.save-st.ok{color:#2E9C76}
+.save-st.bad{color:var(--pink-d);text-decoration:underline;cursor:pointer}
+.save-st:disabled{cursor:default}
 .nav .btn{flex:1}
 
 /* Overlay */
@@ -418,13 +422,17 @@ const TIMES = ["Pagi", "Siang", "Sore", "Malam"];
 let user = null;          // { email, name, idToken }
 let S = { answers: {}, step: "welcome" };
 /* Nothing is kept in the browser (same as Ekspedisi 9 Nilai): state lives in
-   memory, and progress is saved server-side to the "Draf" tab after consent and
-   after every finished section, then loaded back after sign-in on any device. */
+   memory and is saved server-side to the "Draf" tab per question. Each answer
+   schedules a save (debounced, and at most one request every SAVE_GAP ms per
+   person, so a whole cohort answering at once stays within Apps Script limits);
+   finishing a section saves at once, and leaving the page sends a last beacon.
+   The draft is loaded back after sign-in on any device. */
 try { Object.keys(localStorage).filter(k => k.indexOf("gelang-pesona") === 0).forEach(k => localStorage.removeItem(k)); } catch (e) {}
 const store = { save() {}, load() { return null; } };
-const saveSoon = () => {};
 let saveState = { busy: false, at: null, error: "" };
 const MAX_TEXT = 3000;
+const SAVE_DEBOUNCE = 1500, SAVE_GAP = 6000, SAVE_RETRY = 8000;
+const AS = { timer: null, inflight: null, again: false, lastSent: "", lastAt: 0, status: "idle" };
 
 function tokenFresh() {
   if (PREVIEW || !user || !user.idToken) return true;
@@ -433,22 +441,73 @@ function tokenFresh() {
 function draftState() {
   return { consent: S.consent, answers: S.answers, collected: S.collected || [], step: S.step };
 }
-async function saveProgress() {
-  if (PREVIEW || !CFG.scriptUrl || !user) return;
-  if (!tokenFresh()) { await reauth(); if (!tokenFresh()) { saveState.error = "Sesi login habis. Progres belum tersimpan."; return; } }
-  saveState.busy = true;
-  try {
-    const out = await api({ action: "save", idToken: user.idToken, nama: S.answers.nama || "", progress: (S.collected || []).length, state: draftState() });
-    if (out.ok) { saveState = { busy: false, at: out.at, error: "" }; toast("Progres tersimpan"); }
-    else if (out.code === "ALREADY") { S.submitted = true; saveState.busy = false; render(); }
-    else { saveState = { busy: false, at: saveState.at, error: out.message || "Progres belum tersimpan." }; toast("Progres belum tersimpan. Akan dicoba lagi di bagian berikutnya."); }
-  } catch (e) {
-    saveState = { busy: false, at: saveState.at, error: "Koneksi bermasalah." };
-    toast("Progres belum tersimpan. Akan dicoba lagi di bagian berikutnya.");
-  }
+const canSave = () => !PREVIEW && !!CFG.scriptUrl && !!user && S.consent === "Ya" && !S.submitted;
+const draftJSON = () => JSON.stringify(draftState());
+const hasUnsaved = () => canSave() && draftJSON() !== AS.lastSent;
+
+function setSaveStatus(st) {
+  AS.status = st;
+  const el = document.getElementById("saveSt"); if (!el) return;
+  const map = {
+    idle: ["", ""], pending: ["Menyimpan…", "pending"], saving: ["Menyimpan…", "pending"],
+    saved: ["Tersimpan ✓", "ok"], error: ["Belum tersimpan", "bad"], expired: ["Sesi habis · masuk lagi", "bad"]
+  };
+  const [txt, cls] = map[st] || map.idle;
+  el.textContent = txt; el.className = "save-st " + cls;
+  el.disabled = st !== "expired" && st !== "error";
 }
+function saveSoon() {
+  if (!canSave()) return;
+  setSaveStatus("pending");
+  clearTimeout(AS.timer);
+  const wait = Math.max(SAVE_DEBOUNCE, AS.lastAt + SAVE_GAP - Date.now());
+  AS.timer = setTimeout(() => flushSave(), wait);
+}
+async function flushSave(opts = {}) {
+  clearTimeout(AS.timer);
+  if (!canSave()) return true;
+  if (AS.inflight) { AS.again = true; return AS.inflight; }
+  const json = draftJSON();
+  if (json === AS.lastSent) { setSaveStatus(AS.lastSent ? "saved" : "idle"); return true; }
+  if (!tokenFresh()) {
+    if (opts.reauth) await reauth();
+    if (!tokenFresh()) { setSaveStatus("expired"); return false; }
+  }
+  setSaveStatus("saving");
+  AS.lastAt = Date.now();
+  AS.inflight = (async () => {
+    try {
+      const out = await api({ action: "save", idToken: user.idToken, nama: S.answers.nama || "", progress: (S.collected || []).length, state: JSON.parse(json) });
+      if (out.ok) { AS.lastSent = json; saveState = { busy: false, at: out.at, error: "" }; setSaveStatus("saved"); return true; }
+      if (out.code === "ALREADY") { S.submitted = true; render(); return true; }
+      if (out.code === "AUTH") { setSaveStatus("expired"); return false; }
+      throw new Error(out.message);
+    } catch (e) {
+      setSaveStatus("error");
+      clearTimeout(AS.timer); AS.timer = setTimeout(() => flushSave(), SAVE_RETRY);
+      return false;
+    } finally {
+      AS.inflight = null;
+      if (AS.again) { AS.again = false; if (draftJSON() !== AS.lastSent) saveSoon(); }
+    }
+  })();
+  return AS.inflight;
+}
+/* Finishing a section: save now, renewing the sign-in if needed. */
+function saveProgress() { return flushSave({ reauth: true }); }
+/* Last-chance save when the tab is hidden or closed. */
+function beaconSave() {
+  if (!hasUnsaved() || !tokenFresh() || !navigator.sendBeacon) return;
+  const json = draftJSON();
+  const body = JSON.stringify({ action: "save", idToken: user.idToken, nama: S.answers.nama || "", progress: (S.collected || []).length, state: JSON.parse(json) });
+  if (navigator.sendBeacon(CFG.scriptUrl, new Blob([body], { type: "text/plain;charset=utf-8" }))) AS.lastSent = json;
+}
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") beaconSave(); });
+window.addEventListener("pagehide", beaconSave);
+window.addEventListener("beforeunload", e => { if (hasUnsaved() && (AS.inflight || AS.status === "pending")) { beaconSave(); } });
 async function clearProgress() {
   if (PREVIEW || !CFG.scriptUrl || !user || !tokenFresh()) return;
+  clearTimeout(AS.timer); AS.lastSent = ""; setSaveStatus("idle");
   try { await api({ action: "clear", idToken: user.idToken }); } catch (e) {}
 }
 
@@ -632,6 +691,10 @@ function renderWelcome() {
     if (S.consent !== "Ya") return go("consent");
     const firstOpen = SECTIONS.find(s => !(S.collected || []).includes(s.id));
     go(firstOpen ? firstOpen.id : "review");
+    if (started) setTimeout(() => {
+      const q = [...$app.querySelectorAll("[data-wrap]:not([hidden]) .q")].find(x => !x.classList.contains("done"));
+      if (q && q !== $app.querySelector("[data-wrap]:not([hidden]) .q")) q.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 120);
   };
   const rb = document.getElementById("restartBtn");
   if (rb) rb.onclick = () => {
@@ -739,10 +802,12 @@ function updateNav() {
   const pr = secProgress(SECTIONS[i]);
   $navIn.innerHTML = `
     <button class="btn ghost" id="prevBtn" aria-label="Kembali" style="flex:0 0 auto;padding:13px 16px">←</button>
-    <span class="count">${pr.done}/${pr.total}</span>
+    <span class="count">${pr.done}/${pr.total}${canSave() ? `<button type="button" class="save-st" id="saveSt" disabled></button>` : ""}</span>
     <button class="btn" id="nextBtn">${i === SECTIONS.length - 1 ? "Periksa jawaban" : "Lanjut"} →</button>`;
   document.getElementById("prevBtn").onclick = () => go(i === 0 ? "welcome" : SECTIONS[i - 1].id);
   document.getElementById("nextBtn").onclick = () => tryNext(i);
+  const st = document.getElementById("saveSt");
+  if (st) { setSaveStatus(AS.status); st.onclick = async () => { if (AS.status === "expired") await reauth(); flushSave(); }; }
 }
 
 function syncVisibility() {
@@ -1019,6 +1084,7 @@ function initGoogle(tries = 0) {
 async function signedIn(u) {
   user = u;
   S = { answers: {}, step: "welcome" };
+  clearTimeout(AS.timer); Object.assign(AS, { lastSent: "", lastAt: 0, again: false, status: "idle" });
   if (!PREVIEW && CFG.scriptUrl) {
     $app.innerHTML = `<section class="card" style="margin-top:28px;text-align:center"><p class="muted" style="margin:0">Memeriksa progres Anda…</p></section>`;
     try {
@@ -1027,6 +1093,7 @@ async function signedIn(u) {
       else if (st.ok && st.draft && st.draft.state) {
         S = Object.assign({ answers: {}, collected: [] }, st.draft.state);
         saveState.at = st.draft.at;
+        AS.lastSent = draftJSON();
       }
     } catch (e) { toast("Progres sebelumnya belum bisa dimuat. Periksa koneksi."); }
   }
@@ -1034,7 +1101,13 @@ async function signedIn(u) {
   S.step = "welcome";
   render();
 }
-document.getElementById("logoutBtn").onclick = () => {
+document.getElementById("logoutBtn").onclick = async () => {
+  if (hasUnsaved()) {
+    toast("Menyimpan jawaban terakhir…");
+    const ok = await flushSave();
+    if (!ok && !confirm("Jawaban terakhir belum tersimpan. Tetap keluar?")) return;
+  }
+  clearTimeout(AS.timer);
   if (!PREVIEW && window.google && google.accounts) google.accounts.id.disableAutoSelect();
   user = null; S = { answers: {}, step: "welcome" }; render();
 };

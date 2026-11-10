@@ -27,8 +27,9 @@ sent, and the submit button only simulates sending. Good for showing Bidang SDM.
   not nudge answers.
 - No scores are shown back to the respondent (wellbeing answers are sensitive).
 - Nothing is stored in the browser (same as Ekspedisi 9 Nilai). Progress is
-  saved server-side to the `Draf` tab after every finished
-  section, loaded back after sign-in on any device, and deleted on submission
+  saved server-side to the `Draf` tab per question (debounced; at most one
+  request every 6 s per person, immediately on finishing a section, and a
+  last `sendBeacon` when the tab is hidden or closed), loaded back after sign-in on any device, and deleted on submission
   or with "Mulai dari awal". Sign-in is never persisted; every visit asks for
   Google sign-in again. An expired ID token (1 hour) is renewed in a popup
   without losing in-memory answers.
