@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Gelang Pesona Serdik</title>
+<title>Kuesioner Beban Kegiatan dan Kesejahteraan Serdik</title>
 <meta name="description" content="Kuesioner Beban Kegiatan dan Kesejahteraan Serdik P3MD">
 <meta name="theme-color" content="#FFF6EE">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -182,7 +182,7 @@ footer{text-align:center;font-size:12px;color:var(--ink-3);margin-top:28px}
 <header class="top" id="top" hidden>
   <div class="top-in">
     <div class="top-row">
-      <div class="brand"><span id="topTitle">Gelang Pesona</span></div>
+      <div class="brand"><span id="topTitle">Kuesioner Beban &amp; Kesejahteraan</span></div>
       <div class="who"><span id="whoEmail"></span><button class="chip-btn" id="logoutBtn">Keluar</button></div>
     </div>
     <div id="braceletTop"></div>
@@ -411,14 +411,58 @@ const TIMES = ["Pagi", "Siang", "Sore", "Malam"];
 /* ---------- State & storage ---------- */
 let user = null;          // { email, name, idToken }
 let S = { answers: {}, step: "welcome" };
-const store = {
-  key: () => "gelang-pesona:v1:" + (user ? user.email : "anon"),
-  load() { try { const v = localStorage.getItem(this.key()); return v ? JSON.parse(v) : null; } catch (e) { return null; } },
-  save() { try { localStorage.setItem(this.key(), JSON.stringify(S)); } catch (e) {} },
-  clear() { try { localStorage.removeItem(this.key()); } catch (e) {} }
-};
-let saveTimer = null;
-const saveSoon = () => { clearTimeout(saveTimer); saveTimer = setTimeout(() => store.save(), 300); };
+/* Nothing is kept in the browser (same as Ekspedisi 9 Nilai): state lives in
+   memory, and progress is saved server-side to the "Draf" tab after consent and
+   after every finished section, then loaded back after sign-in on any device. */
+try { Object.keys(localStorage).filter(k => k.indexOf("gelang-pesona") === 0).forEach(k => localStorage.removeItem(k)); } catch (e) {}
+const store = { save() {}, load() { return null; } };
+const saveSoon = () => {};
+let saveState = { busy: false, at: null, error: "" };
+const MAX_TEXT = 3000;
+
+function tokenFresh() {
+  if (PREVIEW || !user || !user.idToken) return true;
+  try { return decodeJwt(user.idToken).exp * 1000 - Date.now() > 60000; } catch (e) { return false; }
+}
+function draftState() {
+  return { consent: S.consent, answers: S.answers, collected: S.collected || [], step: S.step };
+}
+async function saveProgress() {
+  if (PREVIEW || !CFG.scriptUrl || !user) return;
+  if (!tokenFresh()) { await reauth(); if (!tokenFresh()) { saveState.error = "Sesi login habis. Progres belum tersimpan."; return; } }
+  saveState.busy = true;
+  try {
+    const out = await api({ action: "save", idToken: user.idToken, nama: S.answers.nama || "", progress: (S.collected || []).length, state: draftState() });
+    if (out.ok) { saveState = { busy: false, at: out.at, error: "" }; toast("Progres tersimpan"); }
+    else if (out.code === "ALREADY") { S.submitted = true; saveState.busy = false; render(); }
+    else { saveState = { busy: false, at: saveState.at, error: out.message || "Progres belum tersimpan." }; toast("Progres belum tersimpan. Akan dicoba lagi di bagian berikutnya."); }
+  } catch (e) {
+    saveState = { busy: false, at: saveState.at, error: "Koneksi bermasalah." };
+    toast("Progres belum tersimpan. Akan dicoba lagi di bagian berikutnya.");
+  }
+}
+async function clearProgress() {
+  if (PREVIEW || !CFG.scriptUrl || !user || !tokenFresh()) return;
+  try { await api({ action: "clear", idToken: user.idToken }); } catch (e) {}
+}
+
+/* Renew an expired ID token without losing in-memory answers. */
+let reauthResolve = null;
+function reauth() {
+  if (PREVIEW) return Promise.resolve();
+  return new Promise(resolve => {
+    reauthResolve = resolve;
+    const ov = document.createElement("div"); ov.className = "overlay"; ov.id = "reauth";
+    ov.innerHTML = `<div class="pop" role="dialog">
+      <h2 style="margin:0 0 6px">Sesi login habis</h2>
+      <p class="muted" style="margin:0 0 14px">Masuk lagi dengan akun ${esc(user.email)}. Jawaban Anda tidak hilang.</p>
+      <div class="gbtn" id="gbtnRe"></div>
+      <button class="link" id="reCancel">Nanti saja</button></div>`;
+    document.body.appendChild(ov);
+    google.accounts.id.renderButton(document.getElementById("gbtnRe"), { theme: "outline", size: "large", shape: "pill", text: "signin_with", locale: "id" });
+    document.getElementById("reCancel").onclick = () => { ov.remove(); reauthResolve = null; resolve(); };
+  });
+}
 
 /* ---------- Item model ---------- */
 const allItems = sec => sec.blocks.flatMap(b => b.items);
@@ -480,7 +524,7 @@ function bracelet(current, opts = {}) {
       ${now && !got ? `<circle cx="${p.x}" cy="${p.y + 21}" r="17" fill="none" stroke="${col}" stroke-width="2.5" stroke-dasharray="${(pr.total ? pr.done / pr.total : 0) * 107} 107" transform="rotate(-90 ${p.x} ${p.y + 21})"/>` : ""}
     </g>`;
   });
-  return `<svg class="bracelet" viewBox="0 0 ${W} 64" role="img" aria-label="Gelang pesona: ${(S.collected || []).length} dari ${n} terkumpul">
+  return `<svg class="bracelet" viewBox="0 0 ${W} 64" role="img" aria-label="Pesona terkumpul: ${(S.collected || []).length} dari ${n} terkumpul">
     <path d="${chain}" fill="none" stroke="#E2C9B5" stroke-width="5" stroke-linecap="round"/>
     <path d="${chain}" fill="none" stroke="#C9A98E" stroke-width="2" stroke-dasharray="5 4" stroke-linecap="round"/>
     ${g}</svg>`;
@@ -528,19 +572,19 @@ function renderLogin() {
   $app.innerHTML = `
     <section class="hero">
       <div class="hero-charms">${SECTIONS.map(s => charmSVG(s.charm, cssVar(s.color))).join("")}</div>
-      <h1>Gelang <em>Pesona</em> Serdik</h1>
-      <p class="muted">Kuesioner Beban Kegiatan dan Kesejahteraan Serdik<br>${esc(CFG.organizer)}</p>
+      <span class="eyebrow">Bidang SDM × Risdikti · Senat P3MD</span>
+      <h1>Kuesioner Beban Kegiatan dan <em>Kesejahteraan</em> Serdik</h1>
     </section>
     <section class="card stack" style="margin-top:18px">
       ${PREVIEW ? `
         <div class="notice"><b>Mode pratinjau.</b> Client ID Google belum diisi di <code>config.js</code>, jadi Anda bisa mencoba alurnya tanpa masuk. Jawaban tidak dikirim ke mana pun.</div>
         <button class="btn block" id="previewBtn">Coba mode pratinjau</button>` : `
-        <p style="margin:0">Masuk dengan akun Google <b>@${esc(CFG.allowedDomain)}</b> untuk mulai merangkai gelang Anda.</p>
+        <p style="margin:0">Masuk dengan akun Google <b>@${esc(CFG.allowedDomain)}</b> untuk mulai mengisi.</p>
         <div class="gbtn" id="gbtn"></div>
-        <p class="small muted" style="margin:0">Satu akun hanya bisa mengirim satu kali. Draf tersimpan di perangkat ini dan bisa dilanjutkan kapan saja.</p>
+        <p class="small muted" style="margin:0">Kami hanya membaca nama dan alamat email akun Anda untuk memastikan Anda Serdik P3MD. Tidak ada kata sandi yang dilihat atau disimpan. Satu akun hanya bisa mengirim satu kali.</p>
         <div class="err" id="loginErr" hidden></div>`}
     </section>
-    <footer>${esc(CFG.organizer)} · <a href="privacy.html" style="color:inherit">Kebijakan privasi</a></footer>`;
+    <footer>${esc(CFG.organizer)} · <a href="privasi.html" style="color:inherit">Kebijakan privasi</a></footer>`;
   if (PREVIEW) {
     document.getElementById("previewBtn").onclick = () => signedIn({ email: "pratinjau@" + CFG.allowedDomain, name: "", idToken: "" });
   } else initGoogle();
@@ -554,13 +598,14 @@ function renderWelcome() {
     <section class="hero">
       <h1>Halo, rekan <em>Serdik</em>!</h1>
       <p class="muted" style="margin:0 0 4px">Di tengah jadwal yang seru (dan kadang bikin ngos-ngosan), ${esc(CFG.organizer)} ingin mendengar langsung dari Anda: bagaimana kegiatan pendidikan selama ini terasa?</p>
-      <div class="facts"><span>± ${total} pertanyaan</span><span>± 15 menit</span><span>Draf tersimpan otomatis</span></div>
+      <div class="facts"><span>± ${total} pertanyaan</span><span>± 15 menit</span><span>Tersimpan di setiap bagian</span></div>
     </section>
     <section class="card stack" style="margin-top:14px">
-      <span class="eyebrow">Rangkai gelang Anda</span>
-      <p style="margin:0">Setiap bagian yang selesai memberi Anda satu pesona. Kumpulkan ketujuhnya untuk melengkapi gelang.</p>
+      <span class="eyebrow">Kumpulkan 7 pesona</span>
+      <p style="margin:0">Setiap bagian yang selesai memberi Anda satu pesona dan langsung tersimpan, jadi bisa dilanjutkan dari perangkat mana pun setelah masuk.</p>
       <ol class="path">${SECTIONS.map(s => `<li>${charmSVG(s.charm, cssVar(s.color), { filled: (S.collected || []).includes(s.id) })}${esc(s.short)}</li>`).join("")}</ol>
-      <button class="btn block" id="startBtn">${started ? "Lanjutkan merangkai" : "Mulai merangkai"}</button>
+      <button class="btn block" id="startBtn">${started ? "Lanjutkan mengisi" : "Mulai mengisi"}</button>
+      ${saveState.at ? `<p class="small muted" style="margin:0;text-align:center">Progres terakhir tersimpan ${esc(new Date(saveState.at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" }))}</p>` : ""}
       ${started ? `<button class="link" id="restartBtn">Mulai dari awal</button>` : ""}
     </section>
     <section class="card stack" style="margin-top:14px">
@@ -580,8 +625,8 @@ function renderWelcome() {
   };
   const rb = document.getElementById("restartBtn");
   if (rb) rb.onclick = () => {
-    if (!confirm("Hapus semua jawaban di perangkat ini dan mulai dari awal?")) return;
-    S = { answers: {}, step: "welcome" }; store.save(); render();
+    if (!confirm("Hapus draf jawaban Anda dan mulai dari awal?")) return;
+    S = { answers: {}, step: "welcome" }; clearProgress(); render();
   };
 }
 
@@ -601,6 +646,7 @@ function renderConsent() {
   $app.querySelectorAll("[data-consent]").forEach(b => b.onclick = () => {
     S.consent = b.dataset.consent;
     go(S.consent === "Ya" ? SECTIONS[0].id : "declined");
+    if (S.consent === "Ya") saveProgress();
   });
 }
 
@@ -643,7 +689,7 @@ function itemHTML(it, n) {
       `<button type="button" class="opt sq" data-k="${it.k}" data-m="${esc(o)}" aria-pressed="${v.includes(o)}"><i></i>${o === "__other" ? "Lainnya" : esc(o)}</button>`).join("")}</div>
       ${it.other ? `<input class="f" data-other="${it.k}" placeholder="Tulis di sini" value="${esc(a[it.k + "_other"] || "")}" ${v.includes("__other") ? "" : "hidden"}>` : ""}`;
   } else if (it.t === "long") {
-    body = `<textarea class="f" data-k="${it.k}" data-input placeholder="Tulis jawaban Anda">${esc(a[it.k] || "")}</textarea>`;
+    body = `<textarea class="f" data-k="${it.k}" data-input maxlength="${MAX_TEXT}" placeholder="Tulis jawaban Anda">${esc(a[it.k] || "")}</textarea>`;
   } else if (it.t === "days") {
     const v = a[it.k] || [];
     body = `<div class="daygrid"><span></span>${TIMES.map(t => `<span class="h">${t}</span>`).join("")}
@@ -731,10 +777,11 @@ function tryNext(i) {
   }
   const next = i === SECTIONS.length - 1 ? "review" : SECTIONS[i + 1].id;
   S.collected = S.collected || [];
-  if (!S.collected.includes(sec.id)) {
-    S.collected.push(sec.id); store.save();
-    celebrate(sec, () => go(next));
-  } else go(next);
+  const first = !S.collected.includes(sec.id);
+  if (first) S.collected.push(sec.id);
+  S.step = next;
+  saveProgress();
+  if (first) celebrate(sec, () => go(next)); else go(next);
 }
 
 /* ---------- Events ---------- */
@@ -814,7 +861,7 @@ function renderReview() {
     <section class="card stack" style="margin-top:14px">
       <p style="margin:0">Setelah dikirim, jawaban <b>tidak bisa diubah lagi</b> dan akun ini tidak bisa mengirim ulang.</p>
       ${PREVIEW ? `<div class="notice">Mode pratinjau: tombol di bawah hanya menyimulasikan pengiriman.</div>` : ""}
-      <button class="btn block" id="sendBtn" ${ready ? "" : "disabled"}>Kirim & lengkapi gelang</button>
+      <button class="btn block" id="sendBtn" ${ready ? "" : "disabled"}>Kirim jawaban</button>
       <div class="err" id="sendErr" hidden></div>
     </section>`;
   $app.querySelectorAll("[data-goto]").forEach(b => b.onclick = () => go(b.dataset.goto));
@@ -842,12 +889,14 @@ async function submit() {
   const btn = document.getElementById("sendBtn"), err = document.getElementById("sendErr");
   btn.disabled = true; btn.textContent = "Mengirim…"; err.hidden = true;
   try {
+    if (!tokenFresh()) await reauth();
+    if (!tokenFresh()) throw new Error("Sesi login habis. Masuk lagi untuk mengirim; jawaban Anda tidak hilang.");
     if (PREVIEW) { await new Promise(r => setTimeout(r, 700)); }
     else {
       const res = await api({ action: "submit", idToken: user.idToken, rows: payload() });
       if (!res.ok) {
         if (res.code === "ALREADY") { S.submitted = true; store.save(); return render(); }
-        if (res.code === "AUTH") throw new Error("Sesi masuk sudah kedaluwarsa. Tekan Keluar, lalu masuk lagi; jawaban Anda tetap tersimpan.");
+        if (res.code === "AUTH") throw new Error("Sesi login habis. Tekan Kirim lagi lalu masuk ulang; jawaban Anda tidak hilang.");
         throw new Error(res.message || "Pengiriman gagal.");
       }
     }
@@ -856,7 +905,7 @@ async function submit() {
     render(); window.scrollTo({ top: 0 });
   } catch (e) {
     err.textContent = e.message || "Pengiriman gagal. Periksa koneksi lalu coba lagi."; err.hidden = false;
-    btn.disabled = false; btn.textContent = "Kirim & lengkapi gelang";
+    btn.disabled = false; btn.textContent = "Kirim jawaban";
   }
 }
 
@@ -867,7 +916,7 @@ function renderDone() {
   const wa = (CFG.sdmContact.wa || "").replace(/\D/g, "");
   $app.innerHTML = `
     <section class="done-hero">
-      <span class="eyebrow">Gelang lengkap</span>
+      <span class="eyebrow">7 dari 7 pesona · Jawaban terkirim</span>
       <h1 class="display" style="font-size:30px;margin:6px 0 2px">Terima kasih sudah berbagi dengan jujur</h1>
       <div style="margin:14px auto 4px;max-width:420px">${bracelet(-1, { allDone: true })}</div>
     </section>
@@ -907,7 +956,7 @@ function celebrate(sec, then) {
     <span class="big">${charmSVG(sec.charm, cssVar(sec.color))}</span>
     <span class="eyebrow" style="color:${cssVar(sec.color)}">${got} dari ${n} pesona</span>
     <h2 style="margin:4px 0 6px">Pesona ${esc(sec.name)} terkumpul!</h2>
-    <p class="muted" style="margin:0 0 16px">${got < n ? `Tinggal ${n - got} lagi untuk melengkapi gelang.` : "Semua pesona terkumpul. Tinggal periksa dan kirim."}</p>
+    <p class="muted" style="margin:0 0 16px">${got < n ? `Tinggal ${n - got} lagi. Progres Anda sudah tersimpan.` : "Semua pesona terkumpul. Tinggal periksa dan kirim."}</p>
     <button class="btn block">${got < n ? "Lanjut" : "Periksa jawaban"}</button></div>`;
   document.body.appendChild(ov);
   const r = ov.querySelector(".big").getBoundingClientRect();
@@ -935,6 +984,14 @@ function initGoogle(tries = 0) {
     client_id: CFG.clientId, hd: CFG.allowedDomain, auto_select: false, ux_mode: "popup",
     callback: r => {
       const c = decodeJwt(r.credential);
+      if (reauthResolve && user) {
+        if ((c.email || "").toLowerCase() === user.email) {
+          user.idToken = r.credential;
+          const ov = document.getElementById("reauth"); if (ov) ov.remove();
+          const done = reauthResolve; reauthResolve = null; done();
+        } else toast(`Gunakan akun yang sama: ${user.email}`);
+        return;
+      }
       const err = document.getElementById("loginErr");
       if (!c.email || !c.email.toLowerCase().endsWith("@" + CFG.allowedDomain)) {
         err.textContent = `Gunakan akun @${CFG.allowedDomain}. Akun ${c.email} tidak bisa dipakai.`; err.hidden = false; return;
@@ -947,16 +1004,23 @@ function initGoogle(tries = 0) {
 }
 async function signedIn(u) {
   user = u;
-  S = store.load() || { answers: {}, step: "welcome" };
-  if (!S.answers.nama && u.name) S.answers.nama = u.name.toUpperCase();
-  if (!S.submitted && !PREVIEW && CFG.scriptUrl) {
-    try { const st = await api({ action: "status", idToken: u.idToken }); if (st.ok && st.submitted) { S.submitted = true; store.save(); } } catch (e) {}
+  S = { answers: {}, step: "welcome" };
+  if (!PREVIEW && CFG.scriptUrl) {
+    $app.innerHTML = `<section class="card" style="margin-top:28px;text-align:center"><p class="muted" style="margin:0">Memeriksa progres Anda…</p></section>`;
+    try {
+      const st = await api({ action: "status", idToken: u.idToken });
+      if (st.ok && st.submitted) S.submitted = true;
+      else if (st.ok && st.draft && st.draft.state) {
+        S = Object.assign({ answers: {}, collected: [] }, st.draft.state);
+        saveState.at = st.draft.at;
+      }
+    } catch (e) { toast("Progres sebelumnya belum bisa dimuat. Periksa koneksi."); }
   }
-  S.step = S.submitted ? S.step : "welcome";
+  if (!S.answers.nama && u.name) S.answers.nama = u.name.toUpperCase();
+  S.step = "welcome";
   render();
 }
 document.getElementById("logoutBtn").onclick = () => {
-  store.save();
   if (!PREVIEW && window.google && google.accounts) google.accounts.id.disableAutoSelect();
   user = null; S = { answers: {}, step: "welcome" }; render();
 };
