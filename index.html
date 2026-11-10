@@ -596,7 +596,10 @@ function renderLogin() {
 
 function renderWelcome() {
   setTheme(null); topBar(-1); $nav.hidden = true;
-  const started = Object.keys(S.answers).length > 0;
+  // Real progress only: a finished section, or an answer the user typed or picked
+  // (the name prefilled from the Google account does not count).
+  const started = (S.collected || []).length > 0 ||
+    Object.entries(S.answers).some(([k, v]) => k !== "nama" && v !== "" && v !== undefined && !(Array.isArray(v) && !v.length));
   const total = SECTIONS.reduce((n, s) => n + allItems(s).reduce((m, it) => m + (it.opt ? 0 : units(it).length), 0), 0);
   $app.innerHTML = `
     <section class="hero">
@@ -609,7 +612,7 @@ function renderWelcome() {
       <p style="margin:0">Setiap bagian yang selesai memberi Anda satu pesona dan langsung tersimpan, jadi bisa dilanjutkan dari perangkat mana pun setelah masuk.</p>
       <ol class="path">${SECTIONS.map(s => `<li>${charmSVG(s.charm, cssVar(s.color), { filled: (S.collected || []).includes(s.id) })}${esc(s.short)}</li>`).join("")}</ol>
       <button class="btn block" id="startBtn">${started ? "Lanjutkan mengisi" : "Mulai mengisi"}</button>
-      ${saveState.at ? `<p class="small muted" style="margin:0;text-align:center">Progres terakhir tersimpan ${esc(new Date(saveState.at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" }))}</p>` : ""}
+      ${started && saveState.at ? `<p class="small muted" style="margin:0;text-align:center">Progres terakhir tersimpan ${esc(new Date(saveState.at).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" }))}</p>` : ""}
       ${started ? `<button class="link" id="restartBtn">Mulai dari awal</button>` : ""}
     </section>
     <section class="card stack" style="margin-top:14px">
@@ -648,7 +651,6 @@ function renderConsent() {
   $app.querySelectorAll("[data-consent]").forEach(b => b.onclick = () => {
     S.consent = b.dataset.consent;
     go(S.consent === "Ya" ? SECTIONS[0].id : "declined");
-    if (S.consent === "Ya") saveProgress();
   });
 }
 
