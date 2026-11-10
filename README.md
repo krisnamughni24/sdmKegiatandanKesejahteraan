@@ -1,6 +1,6 @@
-# Gelang Pesona Serdik
+# Kuesioner Beban Kegiatan dan Kesejahteraan Serdik
 
-Charm-bracelet themed web front end for the Bidang SDM questionnaire
+Charm-themed web front end for the Bidang SDM questionnaire
 "Kuesioner Beban Kegiatan dan Kesejahteraan Serdik". Same architecture as
 Ekspedisi 9 Nilai: static site on Vercel, Google sign-in gated to
 `p3md.sbm-itb.ac.id`, one-click submission through a Google Apps Script web
@@ -12,8 +12,8 @@ app into a Google Sheet, one submission per account.
 |---|---|
 | `index.html` | The whole site (questions, flow, styling). |
 | `config.js` | Public settings: Client ID, Apps Script URL, domain, SDM contact, data notice. |
-| `privacy.html` | Privacy policy page for the Google OAuth consent screen. |
-| `apps-script/Code.gs` | Backend: verifies the Google ID token, blocks repeat submissions, writes the row. |
+| `privasi.html` | Privacy policy page (Risdikti as operator) for the Google OAuth consent screen. |
+| `apps-script/Code.gs` | Backend: verifies the Google ID token, saves drafts, blocks repeat submissions, writes the row. |
 
 With `clientId` empty the site runs in **preview mode**: no sign-in, nothing is
 sent, and the submit button only simulates sending. Good for showing Bidang SDM.
@@ -26,8 +26,12 @@ sent, and the submit button only simulates sending. Good for showing Bidang SDM.
 - Charms count completed sections only, never answer values, so the game does
   not nudge answers.
 - No scores are shown back to the respondent (wellbeing answers are sensitive).
-- Drafts are saved in `localStorage`, keyed by the signed-in email. Sign-in is
-  never persisted; every visit asks for Google sign-in again.
+- Nothing is stored in the browser (same as Ekspedisi 9 Nilai). Progress is
+  saved server-side to the `Draf` tab after consent and after every finished
+  section, loaded back after sign-in on any device, and deleted on submission
+  or with "Mulai dari awal". Sign-in is never persisted; every visit asks for
+  Google sign-in again. An expired ID token (1 hour) is renewed in a popup
+  without losing in-memory answers.
 
 ## Changes from the Google Form (worth confirming with Bidang SDM)
 
@@ -47,30 +51,33 @@ sent, and the submit button only simulates sending. Good for showing Bidang SDM.
 
 ## Setup
 
-1. **GitHub + Vercel.** Push this folder to a new repo, import it in Vercel
-   (preset *Other*, no build command), deploy, note the URL.
-2. **Client ID.** Create a new Google Cloud project (e.g. `gelang-pesona`) so the
-   sign-in popup shows this app's own name instead of the 9 Nilai one:
-   OAuth consent screen / Branding → app name "Gelang Pesona Serdik", privacy
-   policy URL `https://<vercel-url>/privacy.html`, audience Internal (or External
-   + Publish). Then Credentials → OAuth client ID → Web application, with the
-   Vercel URL as an authorized JavaScript origin. Only the Client ID is needed —
+The Google Cloud project is owned by the same personal Gmail account as 9 Nilai,
+so the OAuth audience is **External** (published). Who may fill the
+questionnaire is enforced separately: the site rejects non-`p3md.sbm-itb.ac.id`
+accounts after sign-in, and `Code.gs` re-verifies the token and the email domain
+before reading or writing anything.
+
+1. Google Cloud Console: new project → Google Auth Platform (Branding, Audience,
+   Clients). App name "Kuesioner Beban Kegiatan dan Kesejahteraan Serdik",
+   privacy policy `https://sdm-kesejahteraanserdik.vercel.app/privasi.html`,
+   authorized domain `vercel.app`, audience External → Publish app.
+   Web application client with JavaScript origin
+   `https://sdm-kesejahteraanserdik.vercel.app`. Only the Client ID is needed —
    never the client secret.
-3. **Sheet + Apps Script.** Create a new Google Sheet (it can be downloaded as
-   .xlsx any time), open *Extensions → Apps
-   Script*, paste `apps-script/Code.gs`, set `CLIENT_ID` and `ALLOWED_DOMAIN`.
-   *Deploy → New deployment → Web app*, Execute as **Me**, Who has access
-   **Anyone**. Copy the `/exec` URL.
-4. **config.js.** Fill `clientId`, `scriptUrl`, `sdmContact.wa`, and adjust
-   `dataNotice` to what Bidang SDM actually promises. Commit; Vercel redeploys.
+2. New Google Sheet → Extensions → Apps Script → paste `apps-script/Code.gs`,
+   set `CLIENT_ID`, run `setup()` once (grant permissions), then Deploy → New
+   deployment → Web app (Execute as: Me, Who has access: Anyone). Copy `/exec`.
+3. `config.js`: fill `clientId`, `scriptUrl`, optional `sdmContact.wa`. Commit;
+   Vercel redeploys.
 
 After editing `Code.gs`, use *Manage deployments → Edit → New version* so the
 same `/exec` URL serves the new code.
 
 ## Data
 
-- `Jawaban`: one row per account — `Waktu`, `Email`, `persetujuan`, then one
+- `Jawaban`: one row per account — `Waktu kirim`, `Email`, `persetujuan`, then one
   column per answer key in survey order.
+- `Draf`: one row per account still filling in (state as JSON); removed on submission.
 - `Kodebook`: column key, full question text, and code meaning.
 - Likert items are stored as numbers 1–5 (labels in `Kodebook`); NASA-TLX as 0–10
   in columns `tlx_<activity>_<pikir|fisik|waktu|usaha>`.

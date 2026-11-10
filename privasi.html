@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kebijakan Privasi · Kuesioner Beban Kegiatan dan Kesejahteraan Serdik</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600&family=Nunito:wght@400;700;800&display=swap">
+<style>
+/* Plain reading page that shares the questionnaire palette (same layout as the 9 Nilai page). */
+:root {
+  --paper: #FFF6EE; --card: #FFFFFF; --ink: #3A2440; --ink-2: #6E5A72; --line: #F0E1DA; --pink: #C9466C;
+  --f-display: "Fredoka", "Nunito", sans-serif;
+  --f-body: "Nunito", "Segoe UI", system-ui, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--paper); color: var(--ink); font-family: var(--f-body); font-size: 16px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 32px 64px; }
+main { max-width: 680px; margin: 0 auto; background: var(--card); border: 2px solid var(--line); border-radius: 22px; padding: 28px; }
+h1 { font-family: var(--f-display); font-weight: 600; font-size: clamp(30px, 7vw, 40px); line-height: 1.05; margin: 0 0 8px; text-wrap: balance; }
+h2 { font-size: 18px; margin: 28px 0 6px; }
+p, li { max-width: 65ch; }
+ul { padding-left: 20px; }
+.muted { color: var(--ink-2); font-size: 14px; }
+a { color: var(--pink); font-weight: 700; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Kebijakan Privasi</h1>
+  <p class="muted">Kuesioner Beban Kegiatan dan Kesejahteraan Serdik · Berlaku sejak 10 November 2026</p>
+
+  <p>Situs ini adalah tampilan interaktif untuk <b>Kuesioner Beban Kegiatan dan Kesejahteraan Serdik</b> yang disusun Bidang SDM Senat P3MD, dengan situs yang dibangun dan dikelola Risdikti Senat P3MD. Kuesioner terdiri dari data diri, tuntutan kegiatan, kendali dan kebersamaan, beban per kegiatan, makna kegiatan dan kehidupan pribadi, kondisi diri, serta cerita Anda. Halaman ini menjelaskan data apa yang dipakai situs dan ke mana data itu pergi.</p>
+
+  <h2>Data dari akun Google</h2>
+  <p>Saat Anda masuk dengan Google, situs hanya menerima <b>nama</b> dan <b>alamat email</b> akun Anda. Data ini dipakai untuk dua hal: memastikan akun Anda berasal dari domain @p3md.sbm-itb.ac.id, dan mengisi kolom nama secara otomatis. Situs tidak pernah melihat kata sandi Anda dan tidak meminta akses ke Gmail, Drive, kontak, atau data Google lainnya.</p>
+
+  <h2>Jawaban kuesioner</h2>
+  <ul>
+    <li>Selama mengisi, isian Anda disimpan sebagai draf di Google Sheet milik pengelola (tab <i>Draf</i>) setiap kali satu bagian selesai, supaya bisa dilanjutkan dari perangkat mana pun setelah login. Tidak ada jawaban yang disimpan di browser perangkat Anda. Draf dihapus otomatis setelah jawaban Anda dikirim.</li>
+    <li>Saat Anda menekan <b>Kirim jawaban</b>, jawaban dikirim bersama token login Google Anda ke Google Apps Script milik pengelola. Token diperiksa ke Google untuk memastikan akun Anda akun @p3md.sbm-itb.ac.id, lalu jawaban disimpan di Google Sheet milik pengelola dan dibagikan ke Bidang SDM Senat P3MD. Setiap akun hanya bisa mengirim satu kali.</li>
+    <li>Sebagian jawaban bersifat pribadi, seperti nomor WhatsApp, kontak darurat, serta kondisi kesehatan dan kelelahan. Jawaban mentah hanya dibuka oleh tim pengolah Bidang SDM.</li>
+    <li>Data hanya digunakan untuk keperluan internal Senat P3MD: memotret beban kegiatan dan kesejahteraan Serdik sebagai bahan menata tempo dan kegiatan pendidikan. Hasil dilaporkan secara agregat, bukan sebagai penilaian individu.</li>
+  </ul>
+
+  <h2>Yang tidak kami lakukan</h2>
+  <ul>
+    <li>Tidak ada database, analitik, iklan, atau pelacak pihak ketiga di situs ini.</li>
+    <li>Data tidak dijual atau dibagikan ke pihak di luar Senat P3MD.</li>
+  </ul>
+
+  <h2>Menghapus data</h2>
+  <p>Draf bisa Anda hapus sendiri lewat tombol <b>Mulai dari awal</b> di halaman awal. Untuk menghapus jawaban yang sudah terkirim, hubungi Bidang SDM atau pengelola situs.</p>
+
+  <h2>Kontak</h2>
+  <p>Pengelola situs: bidang Riset, Pendidikan, dan Teknologi Senat P3MD · <span>krisnamughni24@gmail.com</span></p>
+
+  <p class="muted"><a href="./">← Kembali ke kuesioner</a></p>
+</main>
+</body>
+</html>

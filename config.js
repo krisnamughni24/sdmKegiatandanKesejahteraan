@@ -20,5 +20,5 @@ window.APP_CONFIG = {
 
   // Who can see raw answers. Edit to match what Bidang SDM actually does.
   dataNotice:
-    "Jawaban mentah hanya dibuka oleh tim pengolah Bidang SDM. Hasil dilaporkan secara agregat, tidak per orang."
+    "Jawaban mentah hanya dibuka oleh tim pengolah Bidang SDM. Hasil dilaporkan secara agregat, bukan penilaian individu."
 };
